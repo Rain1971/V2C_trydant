@@ -7,7 +7,7 @@ from .const import DOMAIN
 
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_IP_ADDRESS): str,
+        vol.Required(CONF_IP_ADDRESS, description={"suggested_value": "IP Trydant"}): str,
     }
 )
 
