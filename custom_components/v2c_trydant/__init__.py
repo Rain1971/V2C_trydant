@@ -4,7 +4,7 @@ from homeassistant.core import HomeAssistant
 
 DOMAIN = "v2c_trydant"
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "switch"]
 
 async def async_setup(hass: HomeAssistant, config: dict):
     hass.data.setdefault(DOMAIN, {})
@@ -27,3 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, entry):
 
 async def async_unload_entry(hass: HomeAssistant, entry):
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+
+

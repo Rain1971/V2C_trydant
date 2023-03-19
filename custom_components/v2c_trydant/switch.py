@@ -5,7 +5,7 @@ import aiohttp
 import async_timeout
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
 from homeassistant.const import CONF_IP_ADDRESS
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
@@ -16,8 +16,8 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
-from .const import DOMAIN, CONF_IP_ADDRESS
 from .coordinator import V2CTrydantDataUpdateCoordinator
+from .const import DOMAIN, CONF_IP_ADDRESS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,13 +54,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     coordinator = V2CTrydantDataUpdateCoordinator(hass, ip_address)
     await coordinator.async_config_entry_first_refresh()
 
-    sensors = [
-        V2CTrydantSensor(coordinator, ip_address, key)
-        for key in coordinator.data.keys()
+    switches = [
+        V2CTrydantSwitch(coordinator, ip_address, key)
+        for key in ["Paused", "Dynamic"]
     ]
-    async_add_entities(sensors)
+    async_add_entities(switches)
 
-class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
+class V2CTrydantSwitch(CoordinatorEntity, SwitchEntity):
     def __init__(self, coordinator, ip_address, data_key):
         super().__init__(coordinator)
         self._ip_address = ip_address
@@ -72,8 +72,22 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def name(self):
-        return f"V2C Trydant Sensor {self._data_key}"
+        return f"V2C Trydant Switch {self._data_key}"
 
     @property
-    def state(self):
-        return self.coordinator.data[self._data_key]
+    def is_on(self):
+        return bool(self.coordinator.data[self._data_key])
+
+    async def async_turn_on(self, **kwargs):
+        async with aiohttp.ClientSession() as session:
+            url = f"http://{self._ip_address}/write/{self._data_key}=1"
+            async with session.get(url) as response:
+                response.raise_for_status()
+                await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs):
+        async with aiohttp.ClientSession() as session:
+            url = f"http://{self._ip_address}/write/{self._data_key}=0"
+            async with session.get(url) as response:
+                response.raise_for_status()
+                await self.coordinator.async_request_refresh()
