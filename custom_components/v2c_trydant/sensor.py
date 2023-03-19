@@ -1,68 +1,78 @@
-import asyncio
 import logging
+from datetime import timedelta
+
 import aiohttp
 import async_timeout
-from typing import Callable, Any
-import datetime
+import voluptuous as vol
 
-from homeassistant.core import HomeAssistant
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import CONF_IP_ADDRESS
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import PlatformNotReady
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
     UpdateFailed,
 )
 
+from .const import DOMAIN, CONF_IP_ADDRESS
+
 _LOGGER = logging.getLogger(__name__)
 
-async def async_get_json(session, url):
-    async with async_timeout.timeout(30):
-        async with session.get(url) as response:
-            return await response.json(content_type=None)
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+        vol.Required(CONF_IP_ADDRESS): str,
+    }
+)
 
-async def async_setup_platform(hass: HomeAssistant, config: dict, async_add_entities: Callable[[list], Any], discovery_info=None):
-    #ip_address = config.get(CONF_IP_ADDRESS)
-    ip_address = "10.48.130.141"
-
-    async def async_update_data():
-        _LOGGER.debug(f"Fetching data from {ip_address}")
-        async with aiohttp.ClientSession() as session:
-            try:
-                data = await async_get_json(session, f"http://{ip_address}/RealTimeData")
-                _LOGGER.debug(f"Received data: {data}")
-                return data
-            except Exception as e:
-                raise UpdateFailed(f"Error fetching data from {ip_address}: {e}")
-
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name="V2C_trydant_sensor",
-        update_method=async_update_data,
-        update_interval=datetime.timedelta(seconds=30),
-    )
-
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
+    ip_address = config_entry.data[CONF_IP_ADDRESS]
+    coordinator = V2CTrydantDataUpdateCoordinator(hass, ip_address)
     await coordinator.async_config_entry_first_refresh()
 
-    async_add_entities([V2C_trydantSensor(coordinator, attr) for attr in coordinator.data.keys()], True)
+    sensors = [
+        V2CTrydantSensor(coordinator, ip_address, key)
+        for key in coordinator.data.keys()
+    ]
+    async_add_entities(sensors)
 
-class V2C_trydantSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, attribute):
+class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
+    def __init__(self, hass, ip_address):
+        self.ip_address = ip_address
+
+        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=30))
+
+    async def _async_update_data(self):
+        try:
+            async with aiohttp.ClientSession() as session:
+                data = await self._async_get_json(session, f"http://{self.ip_address}/RealTimeData")
+                return data
+        except Exception as e:
+            raise UpdateFailed(f"Error fetching data from {self.ip_address}: {e}")
+
+    async def _async_get_json(self, session, url):
+        try:
+            async with session.get(url) as response:
+                response.raise_for_status()
+                return await response.json(content_type=None)
+        except aiohttp.ClientError as err:
+            raise UpdateFailed(f"Error communicating with API: {err}")
+
+class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator, ip_address, data_key):
         super().__init__(coordinator)
-        self._attribute = attribute
-        self._attr_name = f"V2C_trydant_{attribute}"
-        self._attr_unique_id = f"v2c_trydant_{attribute}"
-
-    @property
-    def name(self):
-        return self._attr_name
+        self._ip_address = ip_address
+        self._data_key = data_key
 
     @property
     def unique_id(self):
-        return self._attr_unique_id
+        return f"{self._ip_address}_{self._data_key}"
+
+    @property
+    def name(self):
+        return f"V2C Trydant Sensor {self._data_key}"
 
     @property
     def state(self):
-        return self.coordinator.data.get(self._attribute)
+        return self.coordinator.data[self._data_key]

@@ -1,45 +1,29 @@
-import logging
-
-from homeassistant.const import CONF_IP_ADDRESS
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
+"""The v2c_trydant component."""
+from homeassistant.config_entries import SOURCE_IMPORT
+from homeassistant.core import HomeAssistant
 
 DOMAIN = "v2c_trydant"
-_LOGGER = logging.getLogger(__name__)
 
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_IP_ADDRESS): cv.string,
-            }
+PLATFORMS = ["sensor"]
+
+async def async_setup(hass: HomeAssistant, config: dict):
+    hass.data.setdefault(DOMAIN, {})
+
+    if DOMAIN not in config:
+        return True
+
+    for entry_config in config[DOMAIN]:
+        hass.async_create_task(
+            hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": SOURCE_IMPORT}, data=entry_config
+            )
         )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
 
-async def async_setup(hass, config):
-    hass.data[DOMAIN] = {
-        CONF_IP_ADDRESS: config[DOMAIN].get(CONF_IP_ADDRESS),
-    }
-
-    hass.helpers.discovery.load_platform("sensor", DOMAIN, {}, config)
-
-    async def pause_charger(call):
-        """Pause the V2C_trydant charger."""
-        # ...
-
-    async def resume_charger(call):
-        """Resume the V2C_trydant charger."""
-        # ...
-
-    async def set_charge_intensity(call):
-        """Set the charge intensity of the V2C_trydant charger."""
-        # ...
-
-    hass.services.async_register(DOMAIN, "pause_charger", pause_charger)
-    hass.services.async_register(DOMAIN, "resume_charger", resume_charger)
-    hass.services.async_register(DOMAIN, "set_charge_intensity", set_charge_intensity)
-
-    _LOGGER.info("V2C_trydant integration has been initialized.")
     return True
+
+async def async_setup_entry(hass: HomeAssistant, entry):
+    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    return True
+
+async def async_unload_entry(hass: HomeAssistant, entry):
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

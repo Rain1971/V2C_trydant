@@ -6,7 +6,7 @@
   "dependencies": [],
   "codeowners": ["@Rain1971"],
   "requirements": ["aiohttp"],
-  "config_flow": false,
+  "config_flow": true,
   "iot_class": "local_polling",
   "quality_scale": "internal",
   "ssdp": [],
