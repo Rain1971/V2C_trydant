@@ -4,12 +4,12 @@ import async_timeout
 from datetime import timedelta
 
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed, CoordinatorEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 async def async_get_json(session, url):
-    async with async_timeout.timeout(10):
+    async with async_timeout.timeout(30):
         async with session.get(url) as response:
             return await response.json()
 
@@ -24,6 +24,7 @@ class V2C_trydantData:
             try:
                 data = await async_get_json(session, url)
                 self.attributes = data
+                _LOGGER.debug(f"Fetched data from {url}: {data}")
             except Exception as e:
                 raise UpdateFailed(f"Error fetching data from {url}: {e}")
 
@@ -34,13 +35,14 @@ class V2C_trydantSensor(CoordinatorEntity, Entity):
 
     @property
     def name(self):
-        return f"V2C Trydant {self._attribute}"
+        return f"V2C_trydant {self._attribute}"
 
     @property
     def state(self):
-        return self.coordinator.data.get(self._attribute)
+        return self.coordinator.data.attributes.get(self._attribute)
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+    _LOGGER.debug("Setting up V2C_trydant platform")
     ip_address = hass.data[DOMAIN][CONF_IP_ADDRESS]
     charger_data = V2C_trydantData(ip_address)
 
@@ -54,11 +56,4 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     await coordinator.async_config_entry_first_refresh()
 
-    attributes = [
-        "ChargeState", "ChargePower", "ChargeEnergy", "SlaveError", "ChargeTime", "HousePower",
-        "FVPower", "Paused", "Locked", "Timer", "Intensity", "Dynamic", "MinIntensity",
-        "MaxIntensity", "PauseDynamic", "DynamicPowerMode", "ContractedPower"
-    ]
-
-    sensors = [V2C_trydantSensor(coordinator, attr) for attr in attributes]
-    async_add_entities(sensors, True)
+    async_add_entities([V2C_trydantSensor(coordinator, attr) for attr in charger_data.attributes.keys()])
