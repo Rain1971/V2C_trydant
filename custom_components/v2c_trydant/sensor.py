@@ -43,9 +43,10 @@ class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_get_json(self, session, url):
         try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                return await response.json(content_type=None)
+            async with async_timeout.timeout(10):  # Ajusta el valor de timeout según sea necesario
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    return await response.json(content_type=None)
         except aiohttp.ClientError as err:
             raise UpdateFailed(f"Error communicating with API: {err}")
 
