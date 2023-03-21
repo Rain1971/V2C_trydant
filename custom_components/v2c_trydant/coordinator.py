@@ -14,7 +14,7 @@ class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, ip_address):
         self.ip_address = ip_address
 
-        super().__init__(hass, _LOGGER, name="v2c_trydant", update_interval=timedelta(seconds=30))
+        super().__init__(hass, _LOGGER, name="v2c_trydant", update_interval=timedelta(seconds=2))
 
     async def _async_update_data(self):
         try:
