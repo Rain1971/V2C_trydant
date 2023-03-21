@@ -1,6 +1,6 @@
-# V2C_trydant
+# V2C trydan component for HOME ASSISTANT
 
-Control system for V2C trydant
+Control system for V2C trydan
 
 # Setup:
 
