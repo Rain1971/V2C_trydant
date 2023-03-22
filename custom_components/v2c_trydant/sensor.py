@@ -1,11 +1,11 @@
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import aiohttp
 import async_timeout
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity, SensorDeviceClass
 from homeassistant.const import CONF_IP_ADDRESS
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
@@ -26,6 +26,26 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_IP_ADDRESS): str,
     }
 )
+
+DEVICE_CLASS_MAP = {
+    "ChargePower":SensorDeviceClass.POWER,
+    "ChargeEnergy":SensorDeviceClass.ENERGY,
+    "HousePower":SensorDeviceClass.POWER,
+    "FVPower":SensorDeviceClass.POWER,
+    "Intensity":SensorDeviceClass.CURRENT,
+    "MinIntensit":SensorDeviceClass.CURRENT,
+    "MaxIntensity":SensorDeviceClass.CURRENT
+}
+
+NATIVE_UNIT_MAP = {
+    "ChargePower":"W",
+    "ChargeEnergy":"kWh",
+    "HousePower":"W",
+    "FVPower":"W",
+    "Intensity":"A",
+    "MinIntensit":"A",
+    "MaxIntensity":"A"
+}
 
 class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, ip_address):
@@ -78,3 +98,19 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
     @property
     def state(self):
         return self.coordinator.data[self._data_key]
+
+    @property
+    def device_class(self):
+        return DEVICE_CLASS_MAP.get(self._data_key, "")
+
+    @property
+    def native_unit_of_measurement(self):
+        return NATIVE_UNIT_MAP.get(self._data_key, "")
+
+    @property
+    def last_reset(self):
+        return datetime.fromisoformat('2011-11-04')
+
+    @property
+    def state_class(self):
+        return "measurement"
