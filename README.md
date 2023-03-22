@@ -55,6 +55,10 @@ cards:
         name: En pausa
         icon: mdi:play
         secondary_info: last-changed
+      - entity: switch.v2c_trydant_switch_locked
+        name: Bloquedado
+        icon: mdi:block-helper
+        secondary_info: last-changed
       - entity: sensor.v2c_trydant_sensor_intensity
         name: Intensidad de carga
         secondary_info: last-changed

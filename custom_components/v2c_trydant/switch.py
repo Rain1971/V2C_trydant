@@ -56,7 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
 
     switches = [
         V2CTrydantSwitch(coordinator, ip_address, key)
-        for key in ["Paused", "Dynamic"]
+        for key in ["Paused", "Dynamic", "Locked"]
     ]
     async_add_entities(switches)
 
