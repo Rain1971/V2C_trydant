@@ -4,7 +4,7 @@ Control system for V2C trydan
 
 # Setup:
 
-* Add this repository in HACS
+* Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
 * Add integration and put there your device IP
 * Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/example.yaml) as lovelance example or copy this code:
 
