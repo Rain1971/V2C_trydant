@@ -74,3 +74,7 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
     @property
     def name(self):
         return f"V2C Trydant Sensor {self._data_key}"
+
+    @property
+    def state(self):
+        return self.coordinator.data[self._data_key]
