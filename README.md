@@ -69,4 +69,8 @@ cards:
         secondary_info: none
       - entity: sensor.v2c_trydant_sensor_timer
         name: Tiempo de carga
+      - entity: number.v2c_min_intensity
+        name: Ajusta Imin dinámica
+      - entity: number.v2c_max_intensity
+        name: Ajusta Imax dinámica
 ```
