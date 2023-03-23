@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
-from .const import DOMAIN, CONF_IP_ADDRESS
+from .const import DOMAIN, CONF_IP_ADDRESS, CONF_KWH_PER_100KM
 from .coordinator import V2CTrydantDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,64 +28,48 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 DEVICE_CLASS_MAP = {
-    "ChargePower":SensorDeviceClass.POWER,
-    "ChargeEnergy":SensorDeviceClass.ENERGY,
-    "HousePower":SensorDeviceClass.POWER,
-    "FVPower":SensorDeviceClass.POWER,
-    "Intensity":SensorDeviceClass.CURRENT,
-    "MinIntensit":SensorDeviceClass.CURRENT,
-    "MaxIntensity":SensorDeviceClass.CURRENT
+    "ChargePower": SensorDeviceClass.POWER,
+    "ChargeEnergy": SensorDeviceClass.ENERGY,
+    "HousePower": SensorDeviceClass.POWER,
+    "FVPower": SensorDeviceClass.POWER,
+    "Intensity": SensorDeviceClass.CURRENT,
+    "MinIntensit": SensorDeviceClass.CURRENT,
+    "MaxIntensity": SensorDeviceClass.CURRENT
+}
+
+STATE_CLASS_MAP = {
+    "ChargeEnergy": "total"
 }
 
 NATIVE_UNIT_MAP = {
-    "ChargePower":"W",
-    "ChargeEnergy":"kWh",
-    "HousePower":"W",
-    "FVPower":"W",
-    "Intensity":"A",
-    "MinIntensit":"A",
-    "MaxIntensity":"A"
+    "ChargePower": "W",
+    "ChargeEnergy": "kWh",
+    "HousePower": "W",
+    "FVPower": "W",
+    "Intensity": "A",
+    "MinIntensit": "A",
+    "MaxIntensity": "A"
 }
-
-class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
-    def __init__(self, hass, ip_address):
-        self.ip_address = ip_address
-
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=2))
-
-    async def _async_update_data(self):
-        try:
-            async with aiohttp.ClientSession() as session:
-                data = await self._async_get_json(session, f"http://{self.ip_address}/RealTimeData")
-                return data
-        except Exception as e:
-            raise UpdateFailed(f"Error fetching data from {self.ip_address}: {e}")
-
-    async def _async_get_json(self, session, url):
-        try:
-            async with async_timeout.timeout(10):  # Ajusta el valor de timeout según sea necesario
-                async with session.get(url) as response:
-                    response.raise_for_status()
-                    return await response.json(content_type=None)
-        except aiohttp.ClientError as err:
-            raise UpdateFailed(f"Error communicating with API: {err}")
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
     ip_address = config_entry.data[CONF_IP_ADDRESS]
+    kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 15)
     coordinator = V2CTrydantDataUpdateCoordinator(hass, ip_address)
     await coordinator.async_config_entry_first_refresh()
 
     sensors = [
-        V2CTrydantSensor(coordinator, ip_address, key)
+        V2CTrydantSensor(coordinator, ip_address, key, kwh_per_100km)
         for key in coordinator.data.keys()
     ]
+    sensors.append(ChargeKmSensor(coordinator, ip_address, kwh_per_100km))
     async_add_entities(sensors)
 
 class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, ip_address, data_key):
+    def __init__(self, coordinator, ip_address, data_key, kwh_per_100km):
         super().__init__(coordinator)
         self._ip_address = ip_address
         self._data_key = data_key
+        self._kwh_per_100km = kwh_per_100km
 
     @property
     def unique_id(self):
@@ -109,7 +93,40 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def last_reset(self):
-        return datetime.fromisoformat('2011-11-04')
+        if self.state_class == "total":
+            return datetime.fromisoformat('2011-11-04')
+        return None
+
+    @property
+    def state_class(self):
+        return STATE_CLASS_MAP.get(self._data_key, "measurement")
+
+class ChargeKmSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator, ip_address, kwh_per_100km):
+        super().__init__(coordinator)
+        self._ip_address = ip_address
+        self._kwh_per_100km = kwh_per_100km
+
+    @property
+    def unique_id(self):
+        return f"{self._ip_address}_ChargeKm"
+
+    @property
+    def name(self):
+        return "V2C Trydant Sensor ChargeKm"
+
+    @property
+    def state(self):
+        charge_energy = self.coordinator.data.get("ChargeEnergy", 0)
+        return charge_energy * ((self._kwh_per_100km / 100) * 0.8)
+
+    @property
+    def device_class(self):
+        return SensorDeviceClass.DISTANCE
+
+    @property
+    def native_unit_of_measurement(self):
+        return "km"
 
     @property
     def state_class(self):

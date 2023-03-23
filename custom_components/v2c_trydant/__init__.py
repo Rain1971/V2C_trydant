@@ -101,4 +101,5 @@ async def async_set_max_intensity(hass, ip_address: str, max_intensity):
         url = f"http://{ip_address}/write/MaxIntensity={max_intensity}"
         async with session.get(url) as response:
             response.raise_for_status()
+            
 

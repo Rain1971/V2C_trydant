@@ -31,3 +31,4 @@ class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
                 return await response.json(content_type=None)
         except aiohttp.ClientError as err:
             raise UpdateFailed(f"Error communicating with API: {err}")
+

@@ -46,7 +46,7 @@ cards:
         secondary_info: last-changed
       - entity: switch.v2c_trydant_switch_locked
         name: Bloquedado
-        icon: mdi:block-helper
+        icon: mdi:play
         secondary_info: last-changed
       - entity: sensor.v2c_trydant_sensor_intensity
         name: Intensidad de carga
@@ -59,6 +59,9 @@ cards:
         secondary_info: last-changed
       - entity: sensor.v2c_trydant_sensor_chargeenergy
         name: Energía cargada
+        secondary_info: none
+      - entity: sensor.v2c_trydant_sensor_chargekm
+        name: Km Cargados
         secondary_info: none
       - entity: sensor.v2c_trydant_sensor_timer
         name: Tiempo de carga
