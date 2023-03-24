@@ -17,7 +17,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .coordinator import V2CTrydantDataUpdateCoordinator
-from .const import DOMAIN, CONF_IP_ADDRESS
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,28 +26,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_IP_ADDRESS): str,
     }
 )
-
-class V2CTrydantDataUpdateCoordinator(DataUpdateCoordinator):
-    def __init__(self, hass, ip_address):
-        self.ip_address = ip_address
-
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=2))
-
-    async def _async_update_data(self):
-        try:
-            async with aiohttp.ClientSession() as session:
-                data = await self._async_get_json(session, f"http://{self.ip_address}/RealTimeData")
-                return data
-        except Exception as e:
-            raise UpdateFailed(f"Error fetching data from {self.ip_address}: {e}")
-
-    async def _async_get_json(self, session, url):
-        try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                return await response.json(content_type=None)
-        except aiohttp.ClientError as err:
-            raise UpdateFailed(f"Error communicating with API: {err}")
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
     ip_address = config_entry.data[CONF_IP_ADDRESS]
