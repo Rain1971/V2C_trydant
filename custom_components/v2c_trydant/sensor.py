@@ -33,7 +33,7 @@ DEVICE_CLASS_MAP = {
     "HousePower": SensorDeviceClass.POWER,
     "FVPower": SensorDeviceClass.POWER,
     "Intensity": SensorDeviceClass.CURRENT,
-    "MinIntensit": SensorDeviceClass.CURRENT,
+    "MinIntensity": SensorDeviceClass.CURRENT,
     "MaxIntensity": SensorDeviceClass.CURRENT
 }
 
@@ -47,7 +47,7 @@ NATIVE_UNIT_MAP = {
     "HousePower": "W",
     "FVPower": "W",
     "Intensity": "A",
-    "MinIntensit": "A",
+    "MinIntensity": "A",
     "MaxIntensity": "A"
 }
 
