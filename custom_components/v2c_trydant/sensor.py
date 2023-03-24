@@ -81,7 +81,18 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def state(self):
-        return self.coordinator.data[self._data_key]
+        if self._data_key == "ChargeState":  # Cambia self.data_key a self._data_key
+            current = self.coordinator.data[self._data_key]
+            if current == 0:
+                return "Manguera no conectada"
+            elif current == 1:
+                return "Manguera conectada (NO CARGA)"
+            elif current == 2:
+                return "Manguera conectada (CARGANDO)"
+            else:
+                return current
+        else:
+            return self.coordinator.data[self._data_key]
 
     @property
     def device_class(self):
@@ -118,7 +129,8 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     @property
     def state(self):
         charge_energy = self.coordinator.data.get("ChargeEnergy", 0)
-        return charge_energy * ((self._kwh_per_100km / 100) * 0.8)
+        charge_km = charge_energy / ((self._kwh_per_100km / 100) * 0.8)
+        return round(charge_km, 2)
 
     @property
     def device_class(self):

@@ -13,7 +13,7 @@ DATA_SCHEMA = vol.Schema(
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_KWH_PER_100KM, description={"suggested_value": 15.0}): float,
+        vol.Required(CONF_KWH_PER_100KM, description={"suggested_value": 20.8}): float,
     }
 )
 
