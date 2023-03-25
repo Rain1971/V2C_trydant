@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
-from .const import DOMAIN, CONF_IP_ADDRESS, CONF_KWH_PER_100KM
+from .const import DOMAIN, CONF_KWH_PER_100KM
 from .coordinator import V2CTrydantDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
