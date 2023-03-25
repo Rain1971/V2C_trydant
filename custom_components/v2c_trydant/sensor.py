@@ -81,7 +81,7 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def state(self):
-        if self._data_key == "ChargeState":  # Cambia self.data_key a self._data_key
+        if self._data_key == "ChargeState":
             current = self.coordinator.data[self._data_key]
             if current == 0:
                 return "Manguera no conectada"
@@ -91,6 +91,12 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
                 return "Manguera conectada (CARGANDO)"
             else:
                 return current
+        elif self._data_key == "ChargeTime":
+            charge_time_seconds = self.coordinator.data.get("ChargeTime", 0)
+            hours = charge_time_seconds // 3600
+            minutes = (charge_time_seconds % 3600) // 60
+            seconds = charge_time_seconds % 60
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
         else:
             return self.coordinator.data[self._data_key]
 

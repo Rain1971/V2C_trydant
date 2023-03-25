@@ -1,7 +1,7 @@
 {
   "domain": "v2c_trydant",
   "name": "V2C_trydant",
-  "version": "1.8",
+  "version": "1.9",
   "documentation": "https://github.com/Rain1971/V2C_trydant",
   "dependencies": [],
   "codeowners": ["@Rain1971"],
