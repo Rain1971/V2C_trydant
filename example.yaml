@@ -63,9 +63,12 @@ cards:
       - entity: sensor.v2c_trydan_sensor_chargekm
         name: Km Cargados
         secondary_info: none
-      - entity: sensor.v2c_trydan_sensor_timer
+      - entity: sensor.v2c_trydan_sensor_chargetime
         name: Tiempo de carga
       - entity: number.v2c_min_intensity
         name: Ajusta Imin dinámica
       - entity: number.v2c_max_intensity
         name: Ajusta Imax dinámica
+      - entity: number.v2c_km_to_charge
+        name: Km a Cargar
+        secondary_info: last-changed
