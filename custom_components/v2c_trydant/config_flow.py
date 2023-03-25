@@ -11,12 +11,6 @@ DATA_SCHEMA = vol.Schema(
     }
 )
 
-OPTIONS_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_KWH_PER_100KM, description={"suggested_value": 20.8}): vol.Coerce(float),
-    }
-)
-
 class V2CTrydantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _instance = None
 
@@ -48,16 +42,23 @@ class V2CTrydantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def _async_get_options_flow(self, config_entry):
         return V2CTrydantOptionsFlowHandler(config_entry=config_entry)
 
-
-
 class V2CTrydantOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry):
         self.config_entry = config_entry
+        self.current_kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 20.8)
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        options_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_KWH_PER_100KM, description={"suggested_value": self.current_kwh_per_100km}
+                ): vol.Coerce(float),
+            }
+        )
+
         return self.async_show_form(
-            step_id="init", data_schema=OPTIONS_SCHEMA
+            step_id="init", data_schema=options_schema
         )
