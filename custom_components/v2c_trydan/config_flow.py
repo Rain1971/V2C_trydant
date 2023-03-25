@@ -7,23 +7,23 @@ from .const import DOMAIN, CONF_KWH_PER_100KM
 
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_IP_ADDRESS, description={"suggested_value": "IP Trydant"}): str,
+        vol.Required(CONF_IP_ADDRESS, description={"suggested_value": "IP trydan"}): str,
     }
 )
 
-class V2CTrydantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class V2CtrydanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _instance = None
 
     def __init__(self):
-        if V2CTrydantConfigFlow._instance is None:
-            V2CTrydantConfigFlow._instance = self
+        if V2CtrydanConfigFlow._instance is None:
+            V2CtrydanConfigFlow._instance = self
 
     @classmethod
     def async_get_options_flow(cls, config_entry):
         if cls._instance is not None:
             return cls._instance._async_get_options_flow(config_entry)
         else:
-            return V2CTrydantOptionsFlowHandler(config_entry=config_entry)
+            return V2CtrydanOptionsFlowHandler(config_entry=config_entry)
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
@@ -40,9 +40,9 @@ class V2CTrydantConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_user(import_info)
 
     def _async_get_options_flow(self, config_entry):
-        return V2CTrydantOptionsFlowHandler(config_entry=config_entry)
+        return V2CtrydanOptionsFlowHandler(config_entry=config_entry)
 
-class V2CTrydantOptionsFlowHandler(config_entries.OptionsFlow):
+class V2CtrydanOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry):
         self.config_entry = config_entry
         self.current_kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 20.8)

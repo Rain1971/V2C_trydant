@@ -15,9 +15,11 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
+from homeassistant.helpers.event import async_track_time_interval
 
 from .const import DOMAIN, CONF_KWH_PER_100KM
-from .coordinator import V2CTrydantDataUpdateCoordinator
+from .coordinator import V2CtrydanDataUpdateCoordinator
+from .number import KmToChargeNumber
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,17 +56,17 @@ NATIVE_UNIT_MAP = {
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
     ip_address = config_entry.data[CONF_IP_ADDRESS]
     kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 15)
-    coordinator = V2CTrydantDataUpdateCoordinator(hass, ip_address)
+    coordinator = V2CtrydanDataUpdateCoordinator(hass, ip_address)
     await coordinator.async_config_entry_first_refresh()
 
     sensors = [
-        V2CTrydantSensor(coordinator, ip_address, key, kwh_per_100km)
+        V2CtrydanSensor(coordinator, ip_address, key, kwh_per_100km)
         for key in coordinator.data.keys()
     ]
     sensors.append(ChargeKmSensor(coordinator, ip_address, kwh_per_100km))
     async_add_entities(sensors)
 
-class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
+class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, ip_address, data_key, kwh_per_100km):
         super().__init__(coordinator)
         self._ip_address = ip_address
@@ -77,7 +79,7 @@ class V2CTrydantSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def name(self):
-        return f"V2C Trydant Sensor {self._data_key}"
+        return f"V2C trydan Sensor {self._data_key}"
 
     @property
     def state(self):
@@ -124,13 +126,27 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         self._ip_address = ip_address
         self._kwh_per_100km = kwh_per_100km
 
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        async_track_time_interval(self.hass, self.check_and_pause_charging, timedelta(seconds=10))
+
+    async def check_and_pause_charging(self, now):
+        _LOGGER.debug("Checking if it's necessary to pause charging")
+        km_to_charge = self.hass.states.get("number.v2c_km_to_charge")
+        if km_to_charge is not None:
+            km_to_charge = float(km_to_charge.state)
+            if self.state >= km_to_charge and km_to_charge != 0:
+                _LOGGER.debug("Pausing charging and resetting km to charge")
+                await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
+                self.hass.states.async_set("number.v2c_km_to_charge", 0)
+
     @property
     def unique_id(self):
         return f"{self._ip_address}_ChargeKm"
 
     @property
     def name(self):
-        return "V2C Trydant Sensor ChargeKm"
+        return "V2C trydan Sensor ChargeKm"
 
     @property
     def state(self):

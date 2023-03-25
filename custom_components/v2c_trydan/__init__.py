@@ -1,4 +1,4 @@
-"""The v2c_trydant component."""
+"""The v2c_trydan component."""
 from homeassistant.config_entries import SOURCE_IMPORT
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.const import CONF_IP_ADDRESS
@@ -8,7 +8,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "v2c_trydant"
+DOMAIN = "v2c_trydan"
 
 PLATFORMS = ["sensor", "switch", "number"]
 
