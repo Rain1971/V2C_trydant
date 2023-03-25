@@ -16,6 +16,7 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import async_track_state_change
 
 from .const import DOMAIN, CONF_KWH_PER_100KM
 from .coordinator import V2CtrydanDataUpdateCoordinator
@@ -125,20 +126,54 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self._ip_address = ip_address
         self._kwh_per_100km = kwh_per_100km
+        self._charging_paused = False
 
     async def async_added_to_hass(self):
         await super().async_added_to_hass()
         async_track_time_interval(self.hass, self.check_and_pause_charging, timedelta(seconds=10))
 
+    async def handle_paused_state_change(self, entity_id, old_state, new_state):
+        if new_state is not None and old_state is not None:
+            if new_state.state == "on" and old_state.state == "off":
+                _LOGGER.debug("Charging paused")
+                self.hass.states.async_set("number.v2c_km_to_charge", 0)
+                self._charging_paused = True
+            if new_state.state == "off" and old_state.state == "on":
+                _LOGGER.debug("Charging unpaused")
+                self._charging_paused = False
+
+    async def handle_km_to_charge_state_change(self, event):
+        entity_id = event.data.get("entity_id")
+        
+        if entity_id == "number.v2c_km_to_charge":
+            old_state = event.data.get("old_state")
+            new_state = event.data.get("new_state")
+            _LOGGER.debug(f"Entity {entity_id} changed from {old_state} to {new_state}")
+
+
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        async_track_time_interval(self.hass, self.check_and_pause_charging, timedelta(seconds=10))
+        async_track_state_change(self.hass, ["switch.v2c_trydan_switch_paused"], self.handle_paused_state_change)
+        self.hass.bus.async_listen("state_changed", self.handle_km_to_charge_state_change)
+
+
     async def check_and_pause_charging(self, now):
+        paused_switch = self.hass.states.get("switch.v2c_trydan_switch_paused")
+        if paused_switch is not None and paused_switch.state == "on":
+            _LOGGER.debug("Charging is paused, skipping check_and_pause_charging")
+            return
+
         _LOGGER.debug("Checking if it's necessary to pause charging")
         km_to_charge = self.hass.states.get("number.v2c_km_to_charge")
         if km_to_charge is not None:
             km_to_charge = float(km_to_charge.state)
+            _LOGGER.debug(f"Current km_to_charge value: {km_to_charge}")
             if self.state >= km_to_charge and km_to_charge != 0:
                 _LOGGER.debug("Pausing charging and resetting km to charge")
                 await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
                 self.hass.states.async_set("number.v2c_km_to_charge", 0)
+                self.hass.bus.async_fire("v2c_trydan.charging_complete")
 
     @property
     def unique_id(self):

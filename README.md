@@ -7,6 +7,26 @@ Control system for V2C trydan
 * Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydan.git](https://github.com/Rain1971/V2C_trydan.git) )
 * Add integration and put there your device IP
 * Go to the integration on settings->devices and set Kwh x 100Km of your car by pressing configure
+* You can also use a automation to check when device has chaged the Km set:
+```
+alias: CARGA COCHE COMPLETA
+description: CARGA COMPLETA
+trigger:
+  - platform: event
+    event_type: v2c_trydan.charging_complete
+action:
+  - service: notify.notify
+    data:
+      message: La carga del vehículo ha alcanzado el límite de kilómetros.
+  - service: notify.pushover
+    data:
+      message: KM del coche CARGADOS
+      title: CARGADOR!
+      data:
+        priority: 1
+    enabled: true
+mode: single
+```
 * Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydan/main/example.yaml) as lovelance example or copy this code:
 
 ```
