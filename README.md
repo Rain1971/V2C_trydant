@@ -6,6 +6,7 @@ Control system for V2C trydan
 
 * Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
 * Add integration and put there your device IP
+* Go to the integration on settings->devices and set Kwh x 100Km of your car by pressing configure
 * Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/example.yaml) as lovelance example or copy this code:
 
 ```
