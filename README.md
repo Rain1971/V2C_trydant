@@ -1,13 +1,22 @@
 # V2C trydan component for HOME ASSISTANT
 
-Control system for V2C trydan
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
+[![GitHub release](https://img.shields.io/github/release/Rain1971/V2C_trydant.svg)](https://GitHub.com//Rain1971/V2C_trydant/releases/)
+
+This integration exposes the information and functions made available by V2C trydan directly via Modbus interface in Home Assistant.
+
+# Prerequisites
+
+This integration supports network connection to V2C trydan directly, so that take note of the V2C trydan static IP address previously. 
+
+For a later configuration, you need to know the electrical consumption data of your car expressed in Kwh per 100 km
 
 # Setup:
 
 * Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydan.git](https://github.com/Rain1971/V2C_trydan.git) )
 * Add integration and put there your device IP
 * Go to the integration on settings->devices and set Kwh x 100Km of your car by pressing configure
-* You can also use a automation to check when device has chaged the Km set:
+* You can also use a automation to check when device has changed the Km set:
 ```
 alias: CARGA COCHE COMPLETA
 description: CARGA COMPLETA
@@ -27,7 +36,7 @@ action:
     enabled: true
 mode: single
 ```
-* Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydan/main/example.yaml) as lovelance example or copy this code:
+* Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydan/main/example.yaml) as lovelace example or copy this code:
 
 ```
 type: vertical-stack
