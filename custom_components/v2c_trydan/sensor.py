@@ -136,7 +136,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         if new_state is not None and old_state is not None:
             if new_state.state == "on" and old_state.state == "off":
                 _LOGGER.debug("Charging paused")
-                self.hass.states.async_set("number.v2c_km_to_charge", 0)
+                await self.async_set_km_to_charge(0)
                 self._charging_paused = True
             if new_state.state == "off" and old_state.state == "on":
                 _LOGGER.debug("Charging unpaused")
@@ -150,6 +150,12 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
             new_state = event.data.get("new_state")
             _LOGGER.debug(f"Entity {entity_id} changed from {old_state} to {new_state}")
 
+    async def async_set_km_to_charge(self, value):
+        await self.hass.services.async_call(
+            "number",
+            "set_value",
+            {"entity_id": "number.v2c_km_to_charge", "value": value},
+        )
 
     async def async_added_to_hass(self):
         await super().async_added_to_hass()
@@ -172,7 +178,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
             if self.state >= km_to_charge and km_to_charge != 0:
                 _LOGGER.debug("Pausing charging and resetting km to charge")
                 await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
-                self.hass.states.async_set("number.v2c_km_to_charge", 0)
+                await self.async_set_km_to_charge(0)
                 self.hass.bus.async_fire("v2c_trydan.charging_complete")
 
     @property
