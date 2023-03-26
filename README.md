@@ -13,7 +13,7 @@ For a later configuration, you need to know the electrical consumption data of y
 
 # Setup:
 
-* Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydan.git](https://github.com/Rain1971/V2C_trydan.git) )
+* Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
 * Add integration and put there your device IP
 * Go to the integration on settings->devices and set Kwh x 100Km of your car by pressing configure
 
@@ -66,7 +66,7 @@ action:
     enabled: true
 mode: single
 ```
-* Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydan/main/example.yaml) as lovelace example or copy this code:
+* Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/example.yaml) as lovelace example or copy this code:
 
 ```
 type: vertical-stack
