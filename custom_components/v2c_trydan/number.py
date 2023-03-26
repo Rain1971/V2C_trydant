@@ -9,7 +9,8 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities([MaxIntensityNumber(hass)])
     async_add_entities([MinIntensityNumber(hass)])
-    async_add_entities([KmToChargeNumber(hass)]) 
+    async_add_entities([KmToChargeNumber(hass)])
+    async_add_entities([IntensityNumber(hass)]) 
 
 class MaxIntensityNumber(NumberEntity):
     def __init__(self, hass):
@@ -122,3 +123,40 @@ class KmToChargeNumber(NumberEntity):
             self.async_write_ha_state()
         else:
             _LOGGER.error("v2c_km_to_charge must be between 0 and 1000")
+
+class IntensityNumber(NumberEntity):
+    def __init__(self, hass):
+        self._hass = hass
+        self._state = 6
+
+    @property
+    def name(self):
+        return "v2c_intensity"
+
+    @property
+    def icon(self):
+        return "mdi:car"
+
+    @property
+    def native_unit_of_measurement(self):
+        return "A"
+
+    @property
+    def native_value(self):
+        return self._state
+
+    @property
+    def native_max_value(self):
+        return 32
+
+    @property
+    def native_min_value(self):
+        return 6
+
+    async def async_set_native_value(self, value):
+        if self.native_min_value <= value <= self.native_max_value:
+            self._state = value
+            self.async_write_ha_state()
+        else:
+            _LOGGER.error("v2c_intensity must be between {} and {}".format(self.native_min_value, self.native_max_value))
+

@@ -43,36 +43,38 @@ type: vertical-stack
 cards:
   - type: markdown
     content: <CENTER><H1>CARGADOR COCHE</H1></CENTER>
-  - type: gauge
-    entity: sensor.v2c_trydan_sensor_fvpower
-    severity:
-      green: 0
-      yellow: 8000
-      red: 9500
-    needle: true
-    min: 0
-    max: 10000
-    name: Producción FV
-  - type: gauge
-    entity: sensor.v2c_trydan_sensor_housepower
-    name: Consumo hogar
-    severity:
-      green: -10000
-      yellow: 0
-      red: 0
-    needle: true
-    min: -10000
-    max: 10000
-  - type: gauge
-    entity: sensor.v2c_trydan_sensor_chargepower
-    name: Cargando en el coche
-    needle: true
-    min: 0
-    max: 8000
-    severity:
-      green: 0
-      yellow: 7200
-      red: 7700
+  - type: horizontal-stack
+    cards:
+      - type: gauge
+        entity: sensor.v2c_trydan_sensor_fvpower
+        severity:
+          green: 0
+          yellow: 8000
+          red: 9500
+        needle: true
+        min: 0
+        max: 10000
+        name: Producción FV
+      - type: gauge
+        entity: sensor.v2c_trydan_sensor_housepower
+        name: Consumo hogar
+        severity:
+          green: -10000
+          yellow: 0
+          red: 0
+        needle: true
+        min: -10000
+        max: 10000
+      - type: gauge
+        entity: sensor.v2c_trydan_sensor_chargepower
+        name: Cargando en el coche
+        needle: true
+        min: 0
+        max: 8000
+        severity:
+          green: 0
+          yellow: 7200
+          red: 7700
   - type: entities
     entities:
       - entity: sensor.v2c_trydan_sensor_chargestate
@@ -106,11 +108,31 @@ cards:
         secondary_info: none
       - entity: sensor.v2c_trydan_sensor_chargetime
         name: Tiempo de carga
-      - entity: number.v2c_min_intensity
-        name: Ajusta Imin dinámica
-      - entity: number.v2c_max_intensity
-        name: Ajusta Imax dinámica
       - entity: number.v2c_km_to_charge
         name: Km a Cargar
         secondary_info: last-changed
+        icon: mdi:car-arrow-right
+  - type: conditional
+    conditions:
+      - entity: switch.v2c_trydan_switch_dynamic
+        state: 'on'
+    card:
+      type: entities
+      entities:
+        - entity: number.v2c_min_intensity
+          name: Ajusta Imin dinámica
+          icon: mdi:current-ac
+        - entity: number.v2c_max_intensity
+          name: Ajusta Imax dinámica
+          icon: mdi:current-ac
+  - type: conditional
+    conditions:
+      - entity: switch.v2c_trydan_switch_dynamic
+        state: 'off'
+    card:
+      type: entities
+      entities:
+        - entity: number.v2c_intensity
+          name: Ajusta ICarga
+          icon: mdi:current-ac
 ```
