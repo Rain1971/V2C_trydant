@@ -21,29 +21,29 @@ For a later configuration, you need to know the electrical consumption data of y
 
 The following entities are created:  
 
-| Name                               | Type    | Units   | Description                                    |
-| :--------------------------------- | :------ | :------ | :--------------------------------------------- |
-| v2c_trydan_sensor_chargeenergy     | Sensor | N kWh    | Current charging session energy in kWh.        
-| v2c_trydan_sensor_chargekm         | Sensor | N km     | Current charging session energy in Km.
-| v2c_trydan_sensor_chargepower      | Sensor | N W      | Current charging power in Watts.
-| v2c_trydan_sensor_chargestate      | Sensor | S `values`  | Charge Point. States: `Manguera no conectada`, `Manguera conectada`,`Manguera cargando`
-| v2c_trydan_sensor_chargetime       | Sensor | N s      | Current charging session time. 
-| v2c_trydan_sensor_contractedpower  | Sensor | N W      | House Contracted Power in Watts. Default `-1`
-| vc2_trydan_sensor_dynamic          | Sensor | N `values`  | Dynamic Intensity Modulation state: `0`-Disabled, `1`-Enabled
-| vc2_trydan_sensor_dynamicpowermode | Sensor | N `values`  | Dynamic Mode: 0 Timed Power enabled; `1`-Timed Power Disabled, `2`-Timed Power Disabled and Exclusive Mode setted, `3`-Timed Power Disabled and Min Power Mode setted, `4`-Timed Power Disabled and Grid+FV mode setted, `5`-Timed Power Disabled and Stop Mode setted
-| vc2_trydan_sensor_fvpower          | Sensor | N W      | Photovoltaic power generation in Watts.
-| vc2_trydan_sensor_housepower       | Sensor | N W      | House power consumption in Watts.
-| v2c_trydan_sensor_intensity        | Sensor | N A      | Intensity offered by Charge Point in Amps. 
-| v2c_trydan_sensor_locked           | Sensor | N `values`  | Disabling state of Charge Point: `0`-Enabled, `1`-Disabled 
-| v2c_trydan_sensor_maxintensity     | Sensor | N A      | Intensity offered maximun limit in Amps. (max default 32A)
-| v2c_trydan_sensor_minintensity     | Sensor | N A      | Intensity offered minimun limit in Amps. (max default 6A)
-| v2c_trydan_sensor_paused           | Sensor | N `values`  | Pause state of current charging session: `0`-Enabled, `1`-Disabled                
-| v2c_trydan_sensor_pausedynamic     | Sensor | N `values`  | Dynamic Control Modulation Pause State: `0`-Modulating, `1`-No Modulating
-| v2c_trydan_sensor_slaveerror       | Sensor | N `values`  | Slave communication state: `0`-No error, `1`-error message, `2`-Communication error
-| v2c_trydan_sensor_timer            | Sensor | N `values`  | Charge Point Timer state: `1`-Timer ON, `0`-Timer OFF
-| vc2_trydan_switch_dynamic          | Switch | `on` `off`  | Toggle to dynamic charge. Default `off`                       
-| v2c_trydan_switch_paused           | Switch | `on` `off`  | Toggle to pause charge. Default `off`                        
-| v2c_trydan_switch_locked           | Switch | `on` `off`  | Toggle to block the charger. Default `off`
+| Name                               | Type    | R/W  | Units   | Description                                    |
+| :--------------------------------- | :------ | :--- | :------ | :--------------------------------------------- |
+| v2c_trydan_sensor_chargeenergy     | Sensor | R   | N kWh    | Current charging session energy in kWh.        
+| v2c_trydan_sensor_chargekm         | Sensor | R/W | N km     | Current charging session energy in Km.
+| v2c_trydan_sensor_chargepower      | Sensor | R   | N W      | Current charging power in Watts.
+| v2c_trydan_sensor_chargestate      | Sensor | R   | S `values`  | Charge Point. States: `Manguera no conectada`, `Manguera conectada (NO CARGA)`,`Manguera conectada (CARGANDO)`
+| v2c_trydan_sensor_chargetime       | Sensor | R   | N s      | Current charging session time. 
+| v2c_trydan_sensor_contractedpower  | Sensor | R   | N W      | House Contracted Power in Watts. Default `-1`
+| vc2_trydan_sensor_dynamic          | Sensor | R   | N `values`  | Dynamic Intensity Modulation state: `0`-Disabled, `1`-Enabled
+| vc2_trydan_sensor_dynamicpowermode | Sensor | R   | N `values`  | Dynamic Mode: 0 Timed Power enabled; `1`-Timed Power Disabled, `2`-Timed Power Disabled and Exclusive Mode setted, `3`-Timed Power Disabled and Min Power Mode setted, `4`-Timed Power Disabled and Grid+FV mode setted, `5`-Timed Power Disabled and Stop Mode setted
+| vc2_trydan_sensor_fvpower          | Sensor | R   | N W      | Photovoltaic power generation in Watts.
+| vc2_trydan_sensor_housepower       | Sensor | R   | N W      | House power consumption in Watts.
+| v2c_trydan_sensor_intensity        | Sensor | R/W | N A      | Intensity offered by Charge Point in Amps, **if Dynamic Charge is disabled**. 
+| v2c_trydan_sensor_locked           | Sensor | R   | N `values`  | Disabling state of Charge Point: `0`-Enabled, `1`-Disabled 
+| v2c_trydan_sensor_maxintensity     | Sensor | R/W | N A      | Intensity offered maximun limit in Amps, **if Dynamic Charge is enabled**. (max default 32A)
+| v2c_trydan_sensor_minintensity     | Sensor | R/W | N A      | Intensity offered minimun limit in Amps, **if Dynamic Charge is enabled**. (max default 6A)
+| v2c_trydan_sensor_paused           | Sensor | R   | N `values`  | Pause state of current charging session: `0`-Enabled, `1`-Disabled                
+| v2c_trydan_sensor_pausedynamic     | Sensor | R   | N `values`  | Dynamic Control Modulation Pause State: `0`-Modulating, `1`-No Modulating
+| v2c_trydan_sensor_slaveerror       | Sensor | R   | N `values`  | Slave communication state: `0`-No error, `1`-error message, `2`-Communication error
+| v2c_trydan_sensor_timer            | Sensor | R   | N `values`  | Charge Point Timer state: `1`-Timer ON, `0`-Timer OFF
+| vc2_trydan_switch_dynamic          | Switch | R/W | `on` `off`  | Toggle to dynamic charge. Default `off`                       
+| v2c_trydan_switch_paused           | Switch | R/W | `on` `off`  | Toggle to pause charge. Default `off`                        
+| v2c_trydan_switch_locked           | Switch | R/W | `on` `off`  | Toggle to block the charger. Default `off`
 
 # Examples:
 * You can also use a automation to check when device has changed the Km set:
