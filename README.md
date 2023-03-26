@@ -1,9 +1,9 @@
-# V2C trydan component for HOME ASSISTANT
+# CAR CHARGER V2C trydan component for HOME ASSISTANT
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![GitHub release](https://img.shields.io/github/release/Rain1971/V2C_trydant.svg)](https://GitHub.com//Rain1971/V2C_trydant/releases/)
 
-This integration exposes the information and functions made available by V2C trydan directly via Modbus interface in Home Assistant.
+This integration exposes the information and functions made available by [V2C trydan](https://v2charge.com/trydan/) directly via http interface in Home Assistant.
 
 # Prerequisites
 
