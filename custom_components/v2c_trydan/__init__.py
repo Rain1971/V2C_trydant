@@ -48,6 +48,13 @@ async def async_setup_entry(hass: HomeAssistant, entry):
         else:
             _LOGGER.error("max_intensity must be between 6 and 32")
 
+    async def set_intensity(call):
+        intensity = call.data["intensity"]
+        if 6 <= int(intensity) <= 32:
+            await async_set_intensity(hass, ip_address, intensity)
+        else:
+            _LOGGER.error("max_intensity must be between 6 and 32")
+
     async def set_min_intensity_slider(call):
         min_intensity = call.data.get("v2c_min_intensity")
         if min_intensity is not None:
@@ -78,6 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, entry):
 
     hass.services.async_register(DOMAIN, "set_min_intensity", set_min_intensity)
     hass.services.async_register(DOMAIN, "set_max_intensity", set_max_intensity)
+    hass.services.async_register(DOMAIN, "set_intensity", set_intensity)
     hass.services.async_register(DOMAIN, "set_min_intensity_slider", set_min_intensity_slider)
     hass.services.async_register(DOMAIN, "set_max_intensity_slider", set_max_intensity_slider)
 
@@ -101,5 +109,11 @@ async def async_set_max_intensity(hass, ip_address: str, max_intensity):
         url = f"http://{ip_address}/write/MaxIntensity={max_intensity}"
         async with session.get(url) as response:
             response.raise_for_status()
-            
+
+async def async_set_intensity(hass, ip_address: str, intensity):
+    _LOGGER.debug(f"Setting intensity to {intensity}")
+    async with aiohttp.ClientSession() as session:
+        url = f"http://{ip_address}/write/Intensity={intensity}"
+        async with session.get(url) as response:
+            response.raise_for_status()
 

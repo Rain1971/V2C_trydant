@@ -155,6 +155,7 @@ class IntensityNumber(NumberEntity):
 
     async def async_set_native_value(self, value):
         if self.native_min_value <= value <= self.native_max_value:
+            await self._hass.services.async_call(DOMAIN, "set_intensity", {"intensity": value})
             self._state = value
             self.async_write_ha_state()
         else:
