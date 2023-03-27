@@ -1,16 +1,16 @@
 {
-  "domain": "v2c_trydan",
-  "name": "V2C_trydan",
-  "version": "2.4",
-  "documentation": "https://github.com/Rain1971/V2C_trydant/blob/main/README.md",
-  "issue_tracker": "https://github.com/Rain1971/V2C_trydant/issues",
-  "dependencies": [],
   "codeowners": ["@Rain1971"],
-  "requirements": ["aiohttp"],
   "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/Rain1971/V2C_trydant/blob/main/README.md",
+  "domain": "v2c_trydan",
+  "homekit": {},
   "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/Rain1971/V2C_trydant/issues",
+  "name": "V2C_trydan",
   "quality_scale": "internal",
+  "requirements": ["aiohttp"],
   "ssdp": [],
-  "zeroconf": [],
-  "homekit": {}
+  "version": "2.4",
+  "zeroconf": []
 }
