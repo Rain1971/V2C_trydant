@@ -43,7 +43,6 @@ class MaxIntensityNumber(NumberEntity):
 
     async def async_set_native_value(self, value):
         if 6 <= value <= 32:
-            ip_address = self._hass.data[DOMAIN]["ip_address"]
             await self._hass.services.async_call(DOMAIN, "set_max_intensity_slider", {"v2c_max_intensity": value})
             self._state = value
             self.async_write_ha_state()
@@ -81,7 +80,6 @@ class MinIntensityNumber(NumberEntity):
 
     async def async_set_native_value(self, value):
         if 6 <= value <= 32:
-            ip_address = self._hass.data[DOMAIN]["ip_address"]
             await self._hass.services.async_call(DOMAIN, "set_min_intensity_slider", {"v2c_min_intensity": value})
             self._state = value
             self.async_write_ha_state()
