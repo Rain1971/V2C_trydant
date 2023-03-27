@@ -1,7 +1,6 @@
 {
   "domain": "v2c_trydan",
-  "name": "V2C_trydan",
-  "brand": "v2c",
+  "name": "v2c",
   "codeowners": ["@Rain1971"],
   "config_flow": true,
   "dependencies": [],
