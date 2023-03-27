@@ -101,7 +101,11 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
             seconds = charge_time_seconds % 60
             return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
         else:
-            return self.coordinator.data[self._data_key]
+            value = self.coordinator.data[self._data_key]
+            if self._data_key in ["HousePower", "ChargePower", "FVPower"]:
+                return round(value)
+            else:
+                return value
 
     @property
     def device_class(self):
