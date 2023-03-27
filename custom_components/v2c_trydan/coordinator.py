@@ -30,5 +30,10 @@ class V2CtrydanDataUpdateCoordinator(DataUpdateCoordinator):
                 response.raise_for_status()
                 return await response.json(content_type=None)
         except aiohttp.ClientError as err:
-            raise UpdateFailed(f"Error communicating with API: {err}")
+            _LOGGER.error(f"Error communicating with API: {err}")
+            raise UpdateFailed("Error communicating with API")
+        except Exception as e:
+            _LOGGER.error(f"Error parsing JSON data: {e}")
+            raise UpdateFailed("Error parsing JSON data")
+
 

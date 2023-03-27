@@ -57,15 +57,21 @@ class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
         return bool(self.coordinator.data[self._data_key])
 
     async def async_turn_on(self, **kwargs):
-        async with aiohttp.ClientSession() as session:
-            url = f"http://{self._ip_address}/write/{self._data_key}=1"
-            async with session.get(url) as response:
-                response.raise_for_status()
-                await self.coordinator.async_request_refresh()
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"http://{self._ip_address}/write/{self._data_key}=1"
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    await self.coordinator.async_request_refresh()
+        except Exception as e:
+            _LOGGER.error(f"Error turning on switch: {e}")
 
     async def async_turn_off(self, **kwargs):
-        async with aiohttp.ClientSession() as session:
-            url = f"http://{self._ip_address}/write/{self._data_key}=0"
-            async with session.get(url) as response:
-                response.raise_for_status()
-                await self.coordinator.async_request_refresh()
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"http://{self._ip_address}/write/{self._data_key}=0"
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    await self.coordinator.async_request_refresh()
+        except Exception as e:
+            _LOGGER.error(f"Error turning off switch: {e}")
