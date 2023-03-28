@@ -1,6 +1,6 @@
 {
   "domain": "v2c_trydan",
-  "name": "v2c",
+  "name": "v2c_trydan",
   "codeowners": ["@Rain1971"],
   "config_flow": true,
   "dependencies": [],
@@ -11,6 +11,6 @@
   "quality_scale": "internal",
   "requirements": ["aiohttp"],
   "ssdp": [],
-  "version": "2.5",
+  "version": "2.6",
   "zeroconf": []
 }
