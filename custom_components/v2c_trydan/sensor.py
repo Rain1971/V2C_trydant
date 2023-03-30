@@ -8,6 +8,7 @@ import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity, SensorDeviceClass
 from homeassistant.const import CONF_IP_ADDRESS
 from homeassistant.core import HomeAssistant
+from homeassistant.core import callback
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import (
@@ -73,6 +74,9 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
         self._ip_address = ip_address
         self._data_key = data_key
         self._kwh_per_100km = kwh_per_100km
+        self.imax_old = 0
+        self.imin_old = 0
+        self.i_old = 0
 
     @property
     def unique_id(self):
@@ -81,6 +85,65 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
     @property
     def name(self):
         return f"V2C trydan Sensor {self._data_key}"
+
+    async def update_min_intensity(self, value):
+        #_LOGGER.debug(f"Entity MinIntensity value")
+        if self.imin_old != value:
+            #_LOGGER.debug(f"Entity MinIntensity changed from {self.imin_old} to {value}")
+            if self.hass.states.get("number.v2c_min_intensity") is not None:
+                #_LOGGER.debug(f"Entity MinIntensity update 1000")
+                await self.hass.services.async_call(
+                    "number",
+                    "set_value",
+                    {"entity_id": "number.v2c_min_intensity", "value": float(value)},
+                )
+                self.imin_old = value
+
+    async def update_max_intensity(self, value):
+        if self.imax_old != value:
+            if self.hass.states.get("number.v2c_max_intensity") is not None:
+                await self.hass.services.async_call(
+                    "number",
+                    "set_value",
+                    {"entity_id": "number.v2c_max_intensity", "value": float(value)},
+                )
+                self.imax_old = value
+
+    async def update_intensity(self, value):
+        if self.i_old != value:
+            if self.hass.states.get("number.intensity") is not None:
+                await self.hass.services.async_call(
+                    "number",
+                    "set_value",
+                    {"entity_id": "number.intensity", "value": float(value)},
+                )
+                self.i_old = value
+
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+
+        if self._data_key == "MinIntensity":
+            self.hass.async_create_task(self.update_min_intensity(self.coordinator.data[self._data_key]))
+
+        if self._data_key == "MaxIntensity":
+            self.hass.async_create_task(self.update_max_intensity(self.coordinator.data[self._data_key]))
+
+        if self._data_key == "Intensity":
+            self.hass.async_create_task(self.update_intensity(self.coordinator.data[self._data_key]))
+
+        self.async_on_remove(self.coordinator.async_add_listener(self.update_numbers))
+
+    @callback
+    def update_numbers(self):
+        if self._data_key == "MinIntensity":
+            self.hass.async_create_task(self.update_min_intensity(self.coordinator.data[self._data_key]))
+
+        if self._data_key == "MaxIntensity":
+            self.hass.async_create_task(self.update_max_intensity(self.coordinator.data[self._data_key]))
+
+        if self._data_key == "Intensity":
+            self.hass.async_create_task(self.update_intensity(self.coordinator.data[self._data_key]))
+
 
     @property
     def state(self):
@@ -100,6 +163,12 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
             minutes = (charge_time_seconds % 3600) // 60
             seconds = charge_time_seconds % 60
             return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        elif self._data_key == "MinIntensity":
+            return self.coordinator.data[self._data_key]
+        elif self._data_key == "MaxIntensity":
+            return self.coordinator.data[self._data_key]
+        elif self._data_key == "Intensity":
+            return self.coordinator.data[self._data_key]
         else:
             value = self.coordinator.data[self._data_key]
             if self._data_key in ["HousePower", "ChargePower", "FVPower"]:
@@ -139,11 +208,11 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     async def handle_paused_state_change(self, entity_id, old_state, new_state):
         if new_state is not None and old_state is not None:
             if new_state.state == "on" and old_state.state == "off":
-                _LOGGER.debug("Charging paused")
+                #_LOGGER.debug("Charging paused")
                 await self.async_set_km_to_charge(0)
                 self._charging_paused = True
             if new_state.state == "off" and old_state.state == "on":
-                _LOGGER.debug("Charging unpaused")
+                #_LOGGER.debug("Charging unpaused")
                 self._charging_paused = False
 
     async def handle_km_to_charge_state_change(self, event):
@@ -152,7 +221,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         if entity_id == "number.v2c_km_to_charge":
             old_state = event.data.get("old_state")
             new_state = event.data.get("new_state")
-            _LOGGER.debug(f"Entity {entity_id} changed from {old_state} to {new_state}")
+            #_LOGGER.debug(f"Entity {entity_id} changed from {old_state} to {new_state}")
 
     async def async_set_km_to_charge(self, value):
         await self.hass.services.async_call(
@@ -171,16 +240,16 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     async def check_and_pause_charging(self, now):
         paused_switch = self.hass.states.get("switch.v2c_trydan_switch_paused")
         if paused_switch is not None and paused_switch.state == "on":
-            _LOGGER.debug("Charging is paused, skipping check_and_pause_charging")
+            #_LOGGER.debug("Charging is paused, skipping check_and_pause_charging")
             return
 
-        _LOGGER.debug("Checking if it's necessary to pause charging")
+        #_LOGGER.debug("Checking if it's necessary to pause charging")
         km_to_charge = self.hass.states.get("number.v2c_km_to_charge")
         if km_to_charge is not None:
             km_to_charge = float(km_to_charge.state)
-            _LOGGER.debug(f"Current km_to_charge value: {km_to_charge}")
+            #_LOGGER.debug(f"Current km_to_charge value: {km_to_charge}")
             if self.state >= km_to_charge and km_to_charge != 0:
-                _LOGGER.debug("Pausing charging and resetting km to charge")
+                #_LOGGER.debug("Pausing charging and resetting km to charge")
                 await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
                 await self.async_set_km_to_charge(0)
                 self.hass.bus.async_fire("v2c_trydan.charging_complete")

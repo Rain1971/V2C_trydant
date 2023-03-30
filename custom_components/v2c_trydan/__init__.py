@@ -95,7 +95,7 @@ async def async_unload_entry(hass: HomeAssistant, entry):
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 async def async_set_min_intensity(hass: HomeAssistant, ip_address: str, min_intensity: int):
-    _LOGGER.debug(f"Setting min intensity to {min_intensity}")
+    #_LOGGER.debug(f"Setting min intensity to {min_intensity}")
     async with aiohttp.ClientSession() as session:
         url = f"http://{ip_address}/write/MinIntensity={min_intensity}"
         try:
@@ -105,7 +105,7 @@ async def async_set_min_intensity(hass: HomeAssistant, ip_address: str, min_inte
             _LOGGER.error(f"Error communicating with API: {err}")
 
 async def async_set_max_intensity(hass, ip_address: str, max_intensity):
-    _LOGGER.debug(f"Setting max intensity to {max_intensity}")
+    #_LOGGER.debug(f"Setting max intensity to {max_intensity}")
     async with aiohttp.ClientSession() as session:
         url = f"http://{ip_address}/write/MaxIntensity={max_intensity}"
         try:
@@ -115,7 +115,7 @@ async def async_set_max_intensity(hass, ip_address: str, max_intensity):
             _LOGGER.error(f"Error communicating with API: {err}")
 
 async def async_set_intensity(hass, ip_address: str, intensity):
-    _LOGGER.debug(f"Setting intensity to {intensity}")
+    #_LOGGER.debug(f"Setting intensity to {intensity}")
     async with aiohttp.ClientSession() as session:
         url = f"http://{ip_address}/write/Intensity={intensity}"
         try:
@@ -123,4 +123,3 @@ async def async_set_intensity(hass, ip_address: str, intensity):
                 response.raise_for_status()
         except aiohttp.ClientError as err:
             _LOGGER.error(f"Error communicating with API: {err}")
-
