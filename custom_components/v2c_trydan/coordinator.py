@@ -35,5 +35,3 @@ class V2CtrydanDataUpdateCoordinator(DataUpdateCoordinator):
         except Exception as e:
             _LOGGER.error(f"Error parsing JSON data: {e}")
             raise UpdateFailed("Error parsing JSON data")
-
-
