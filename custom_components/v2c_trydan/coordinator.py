@@ -21,14 +21,15 @@ class V2CtrydanDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             async with aiohttp.ClientSession() as session:
                 data = await self._async_get_json(session, f"http://{self.ip_address}/RealTimeData")
-                self.error_reported = False
+                if self.error_reported:  # Restablece la variable y registra un mensaje de error cuando la comunicación es exitosa
+                    self.error_reported = False
+                    _LOGGER.error(f"Error resolved: Communication with {self.ip_address} restored")
                 return data
         except Exception as e:
-            if not self.error_reported:
+            if not self.error_reported:  # Registra el error solo si no se ha registrado antes
                 self.error_reported = True
                 raise UpdateFailed(f"Error fetching data from {self.ip_address}: {e}")
             else:
-                _LOGGER.debug(f"Error fetching data from {self.ip_address}: {e}")
                 raise UpdateFailed("Error communicating with API")
 
     async def _async_get_json(self, session, url):
@@ -37,18 +38,16 @@ class V2CtrydanDataUpdateCoordinator(DataUpdateCoordinator):
                 response.raise_for_status()
                 return await response.json(content_type=None)
         except aiohttp.ClientError as err:
-            if not self.error_reported:
+            if not self.error_reported:  # Registra el error solo si no se ha registrado antes
                 self.error_reported = True
                 _LOGGER.error(f"Error communicating with API: {err}")
                 raise UpdateFailed("Error communicating with API")
             else:
-                _LOGGER.debug(f"Error communicating with API: {err}")
                 raise UpdateFailed("Error communicating with API")
         except Exception as e:
-            if not self.error_reported:
+            if not self.error_reported:  # Registra el error solo si no se ha registrado antes
                 self.error_reported = True
                 _LOGGER.error(f"Error parsing JSON data: {e}")
                 raise UpdateFailed("Error parsing JSON data")
             else:
-                _LOGGER.debug(f"Error parsing JSON data: {e}")
                 raise UpdateFailed("Error parsing JSON data")

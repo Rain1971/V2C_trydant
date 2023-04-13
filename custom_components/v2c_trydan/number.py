@@ -18,6 +18,10 @@ class MaxIntensityNumber(NumberEntity):
         self._state = 32
 
     @property
+    def unique_id(self):
+        return "v2c_max_intensity"
+
+    @property
     def name(self):
         return "v2c_max_intensity"
 
@@ -53,6 +57,10 @@ class MinIntensityNumber(NumberEntity):
     def __init__(self, hass):
         self._hass = hass
         self._state = 6
+
+    @property
+    def unique_id(self):
+        return "v2c_min_intensity"
 
     @property
     def name(self):
@@ -92,6 +100,10 @@ class KmToChargeNumber(NumberEntity):
         self._state = 0
 
     @property
+    def unique_id(self):
+        return "v2c_km_to_charge"
+
+    @property
     def name(self):
         return "v2c_km_to_charge"
 
@@ -126,6 +138,10 @@ class IntensityNumber(NumberEntity):
     def __init__(self, hass):
         self._hass = hass
         self._state = 6
+
+    @property
+    def unique_id(self):
+        return "v2c_intensity"
 
     @property
     def name(self):
