@@ -11,6 +11,6 @@
   "quality_scale": "internal",
   "requirements": ["aiohttp"],
   "ssdp": [],
-  "version": "2.8",
+  "version": "2.9",
   "zeroconf": []
 }
