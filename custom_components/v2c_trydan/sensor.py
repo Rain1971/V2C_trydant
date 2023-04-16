@@ -66,6 +66,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
         for key in coordinator.data.keys()
     ]
     sensors.append(ChargeKmSensor(coordinator, ip_address, kwh_per_100km))
+    sensors.append(NumericalStatus(coordinator))
     async_add_entities(sensors)
 
 class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
@@ -275,6 +276,35 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_unit_of_measurement(self):
         return "km"
+
+    @property
+    def state_class(self):
+        return "measurement"
+
+class NumericalStatus(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+
+    @property
+    def unique_id(self):
+        return "NumericalStatus"
+
+    @property
+    def name(self):
+        return "V2C trydan NumericalStatus"
+
+    @property
+    def state(self):
+        Charge_State = self.coordinator.data.get("ChargeState", "0")      
+        if Charge_State == "Manguera no conectada":
+            return 0
+        elif Charge_State == "Manguera conectada (NO CARGA)":
+            return 1
+        elif Charge_State == "Manguera conectada (CARGANDO)":
+            return 2
+        else:
+            return Charge_State  
+        return -1
 
     @property
     def state_class(self):
