@@ -24,7 +24,7 @@ The following entities are created:
 | Name                               | Type    | R/W  | Units   | Description                                    |
 | :--------------------------------- | :------ | :--- | :------ | :--------------------------------------------- |
 | v2c_trydan_sensor_chargeenergy     | Sensor | R   | N kWh    | Current charging session energy in kWh.        
-| v2c_trydan_sensor_chargekm         | Sensor | R/W | N km     | Current charging session energy in Km.
+| v2c_trydan_sensor_chargekm  v2c_km_to_charge        | Sensor Number | R \ W | N km     | Current charging session energy in Km.
 | v2c_trydan_sensor_chargepower      | Sensor | R   | N W      | Current charging power in Watts.
 | v2c_trydan_sensor_chargestate      | Sensor | R   | S `values`  | Charge Point. States: `Manguera no conectada`, `Manguera conectada (NO CARGA)`,`Manguera conectada (CARGANDO)`
 | v2c_trydan_sensor_chargetime       | Sensor | R   | N s      | Current charging session time. 
@@ -33,10 +33,10 @@ The following entities are created:
 | vc2_trydan_sensor_dynamicpowermode | Sensor | R   | N `values`  | Dynamic Mode: 0 Timed Power enabled; `1`-Timed Power Disabled, `2`-Timed Power Disabled and Exclusive Mode setted, `3`-Timed Power Disabled and Min Power Mode setted, `4`-Timed Power Disabled and Grid+FV mode setted, `5`-Timed Power Disabled and Stop Mode setted
 | vc2_trydan_sensor_fvpower          | Sensor | R   | N W      | Photovoltaic power generation in Watts.
 | vc2_trydan_sensor_housepower       | Sensor | R   | N W      | House power consumption in Watts.
-| v2c_trydan_sensor_intensity        | Sensor | R/W | N A      | Intensity offered by Charge Point in Amps, **if Dynamic Charge is disabled**. 
+| v2c_trydan_sensor_intensity \   v2c_intensity      | Sensor Number | R \ W | N A      | Intensity offered by Charge Point in Amps, **if Dynamic Charge is disabled**. 
 | v2c_trydan_sensor_locked           | Sensor | R   | N `values`  | Disabling state of Charge Point: `0`-Enabled, `1`-Disabled 
-| v2c_trydan_sensor_maxintensity     | Sensor | R/W | N A      | Intensity offered maximun limit in Amps, **if Dynamic Charge is enabled**. (max default 32A)
-| v2c_trydan_sensor_minintensity     | Sensor | R/W | N A      | Intensity offered minimun limit in Amps, **if Dynamic Charge is enabled**. (max default 6A)
+| v2c_trydan_sensor_maxintensity  v2c_max_intensity   | Sensor Number | R \ W | N A      | Intensity offered maximun limit in Amps, **if Dynamic Charge is enabled**. (max default 32A)
+| v2c_trydan_sensor_minintensity  v2c_min_intensity     | Sensor Number | R \ W | N A      | Intensity offered minimun limit in Amps, **if Dynamic Charge is enabled**. (max default 6A)
 | v2c_trydan_sensor_paused           | Sensor | R   | N `values`  | Pause state of current charging session: `0`-Enabled, `1`-Disabled                
 | v2c_trydan_sensor_pausedynamic     | Sensor | R   | N `values`  | Dynamic Control Modulation Pause State: `0`-Modulating, `1`-No Modulating
 | v2c_trydan_sensor_slaveerror       | Sensor | R   | N `values`  | Slave communication state: `0`-No error, `1`-error message, `2`-Communication error
