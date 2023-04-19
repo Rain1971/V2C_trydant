@@ -26,7 +26,8 @@ The following entities are created:
 | v2c_trydan_sensor_chargeenergy     | Sensor | R   | N kWh    | Current charging session energy in kWh.        
 | v2c_trydan_sensor_chargekm  v2c_km_to_charge        | Sensor Number | R \ W | N km     | Current charging session energy in Km.
 | v2c_trydan_sensor_chargepower      | Sensor | R   | N W      | Current charging power in Watts.
-| v2c_trydan_sensor_chargestate      | Sensor | R   | S `values`  | Charge Point. States: `Manguera no conectada`, `Manguera conectada (NO CARGA)`,`Manguera conectada (CARGANDO)`
+| v2c_trydan_sensor_chargestate      | Sensor | R   | S `values`  | Charge Point. Spanish string States: `Manguera no conectada`, `Manguera conectada (NO CARGA)`,`Manguera conectada (CARGANDO)`
+| v2c_trydan_numericalstatus         | Sensor | R   | N `values`  | Charge Point. Numerical Status: `0`-Hose Not connected, `1`-Hose Connected (BUT NOT CHARGING),`2`-Hose Connected (CHARGING)
 | v2c_trydan_sensor_chargetime       | Sensor | R   | N s      | Current charging session time. 
 | v2c_trydan_sensor_contractedpower  | Sensor | R   | N W      | House Contracted Power in Watts. Default `-1`
 | vc2_trydan_sensor_dynamic          | Sensor | R   | N `values`  | Dynamic Intensity Modulation state: `0`-Disabled, `1`-Enabled
@@ -44,6 +45,14 @@ The following entities are created:
 | vc2_trydan_switch_dynamic          | Switch | R/W | `on` `off`  | Toggle to dynamic charge. Default `off`                       
 | v2c_trydan_switch_paused           | Switch | R/W | `on` `off`  | Toggle to pause charge. Default `off`                        
 | v2c_trydan_switch_locked           | Switch | R/W | `on` `off`  | Toggle to block the charger. Default `off`
+
+# Events:
+
+The following events are created:  
+
+| Event                              | Description                                   |
+| :--------------------------------- |:--------------------------------------------- |
+| v2c_trydan.charging_complete       | Event triggered when the energy corresponding to the selected kilometers has been charged. 
 
 # Examples:
 * You can also use a automation to check when device has changed the Km set:
