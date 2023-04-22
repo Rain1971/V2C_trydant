@@ -7,10 +7,12 @@ from . import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
+
     async_add_entities([MaxIntensityNumber(hass)])
     async_add_entities([MinIntensityNumber(hass)])
     async_add_entities([KmToChargeNumber(hass)])
-    async_add_entities([IntensityNumber(hass)]) 
+    async_add_entities([IntensityNumber(hass)])
+    async_add_entities([MaxPrice(hass)])
 
 class MaxIntensityNumber(NumberEntity):
     def __init__(self, hass):
@@ -175,3 +177,42 @@ class IntensityNumber(NumberEntity):
         else:
             _LOGGER.error("v2c_intensity must be between {} and {}".format(self.native_min_value, self.native_max_value))
 
+class MaxPrice(NumberEntity):
+    def __init__(self, hass):
+        self._hass = hass
+        self._state = 0
+
+    @property
+    def unique_id(self):
+        return "v2c_MaxPrice"
+
+    @property
+    def name(self):
+        return "v2c_MaxPrice"
+
+    @property
+    def icon(self):
+        return "mdi:currency-eur"
+
+    @property
+    def native_value(self):
+        return self._state
+
+    @property
+    def native_step(self) -> float | None:
+        return 0.001
+
+    @property
+    def native_max_value(self):
+        return 1.000
+
+    @property
+    def native_min_value(self):
+        return 0.000
+
+    async def async_set_native_value(self, value):
+        if 0 <= value <= 1.0:
+            self._state = value
+            self.async_write_ha_state()
+        else:
+            _LOGGER.error("v2c_MaxPrice must be between 0 and 1")

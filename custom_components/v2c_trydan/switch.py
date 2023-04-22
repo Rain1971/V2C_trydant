@@ -17,7 +17,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .coordinator import V2CtrydanDataUpdateCoordinator
-from .const import DOMAIN
+from .const import DOMAIN, CONF_PRECIO_LUZ
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,10 +32,16 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     coordinator = V2CtrydanDataUpdateCoordinator(hass, ip_address)
     await coordinator.async_config_entry_first_refresh()
 
+    # Obtén precio_luz_entity
+    precio_luz_entity = hass.states.get(config_entry.options[CONF_PRECIO_LUZ]) if CONF_PRECIO_LUZ in config_entry.options else None
+
     switches = [
         V2CtrydanSwitch(coordinator, ip_address, key)
         for key in ["Paused", "Dynamic", "Locked"]
     ]
+
+    switches.append(V2CCargaPVPCSwitch(precio_luz_entity))
+
     async_add_entities(switches)
 
 class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
@@ -75,3 +81,29 @@ class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
                     await self.coordinator.async_request_refresh()
         except Exception as e:
             _LOGGER.error(f"Error turning off switch: {e}")
+
+class V2CCargaPVPCSwitch(SwitchEntity):
+    def __init__(self, precio_luz_entity):
+        self._is_on = False
+        self.precio_luz_entity = precio_luz_entity
+
+    @property
+    def unique_id(self):
+        return f"v2c_carga_pvpc"
+
+    @property
+    def name(self):
+        return "V2C trydan Switch v2c_carga_pvpc"
+
+    @property
+    def is_on(self):
+        return self._is_on
+
+    async def async_turn_on(self, **kwargs):
+        if self.precio_luz_entity is not None:
+            self._is_on = True
+        else:
+            self._is_on = False
+
+    async def async_turn_off(self, **kwargs):
+        self._is_on = False

@@ -1,27 +1,42 @@
 import logging
+import asyncio
 from datetime import timedelta, datetime
 
 import aiohttp
 import async_timeout
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity, SensorDeviceClass
-from homeassistant.const import CONF_IP_ADDRESS
-from homeassistant.core import HomeAssistant
-from homeassistant.core import callback
+from homeassistant.const import (
+    CONF_NAME,
+    STATE_UNKNOWN,
+    CONF_IP_ADDRESS,
+)
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
+    SensorEntity,
+    SensorDeviceClass,
+)
 from homeassistant.exceptions import PlatformNotReady
+from homeassistant.helpers import entity_registry
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.event import (
+    async_track_time_interval,
+    async_track_state_change,
+    async_call_later,
+)
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.event import async_track_state_change
 
-from .const import DOMAIN, CONF_KWH_PER_100KM
+from .const import DOMAIN, CONF_KWH_PER_100KM, CONF_PRECIO_LUZ
 from .coordinator import V2CtrydanDataUpdateCoordinator
 from .number import KmToChargeNumber
+
+DEPENDENCIES = ["switch"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,6 +70,8 @@ NATIVE_UNIT_MAP = {
     "MaxIntensity": "A"
 }
 
+UPDATE_INTERVAL = timedelta(minutes=1)
+
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
     ip_address = config_entry.data[CONF_IP_ADDRESS]
     kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 15)
@@ -67,6 +84,21 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     ]
     sensors.append(ChargeKmSensor(coordinator, ip_address, kwh_per_100km))
     sensors.append(NumericalStatus(coordinator))
+
+    await asyncio.sleep(10)
+
+    precio_luz_entity = hass.states.get(config_entry.options[CONF_PRECIO_LUZ]) if CONF_PRECIO_LUZ in config_entry.options else None
+
+    async def async_update_precio_luz(now):
+        nonlocal precio_luz_entity
+        if precio_luz_entity is not None:
+            precio_luz_entity = hass.states.get(CONF_PRECIO_LUZ)
+
+    if all([precio_luz_entity]):
+        precio_luz_entity_instance = PrecioLuzEntity(coordinator, precio_luz_entity, ip_address)
+        sensors.append(precio_luz_entity_instance)
+        _LOGGER.debug("PrecioLuzEntity instance added to sensors list")
+
     async_add_entities(sensors)
 
 class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
@@ -241,16 +273,12 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     async def check_and_pause_charging(self, now):
         paused_switch = self.hass.states.get("switch.v2c_trydan_switch_paused")
         if paused_switch is not None and paused_switch.state == "on":
-            #_LOGGER.debug("Charging is paused, skipping check_and_pause_charging")
             return
 
-        #_LOGGER.debug("Checking if it's necessary to pause charging")
         km_to_charge = self.hass.states.get("number.v2c_km_to_charge")
         if km_to_charge is not None:
             km_to_charge = float(km_to_charge.state)
-            #_LOGGER.debug(f"Current km_to_charge value: {km_to_charge}")
             if self.state >= km_to_charge and km_to_charge != 0:
-                #_LOGGER.debug("Pausing charging and resetting km to charge")
                 await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
                 await self.async_set_km_to_charge(0)
                 self.hass.bus.async_fire("v2c_trydan.charging_complete")
@@ -309,3 +337,86 @@ class NumericalStatus(CoordinatorEntity, SensorEntity):
     @property
     def state_class(self):
         return "measurement"
+
+class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator, precio_luz_entity, ip_address):
+        super().__init__(coordinator)
+        self.v2c_precio_luz_entity = precio_luz_entity
+        self.ip_address = ip_address
+
+    @property
+    def unique_id(self):
+        return f"v2c_precio_luz_entity"
+
+    @property
+    def name(self):
+        return "v2c Precio Luz"
+
+    @property
+    def state(self):
+        if self.v2c_precio_luz_entity is not None:
+            return self.v2c_precio_luz_entity.state
+        else:
+            return None
+
+    @property
+    def extra_state_attributes(self):
+        if self.v2c_precio_luz_entity is not None:
+            return self.v2c_precio_luz_entity.attributes
+        else:
+            return None
+
+    @property
+    def state_class(self):
+        if self.v2c_precio_luz_entity is not None:
+            return self.v2c_precio_luz_entity.attributes.get("state_class", "measurement")
+        else:
+            return "measurement"
+
+    @property
+    def native_unit_of_measurement(self):
+        if self.v2c_precio_luz_entity is not None:
+            return self.v2c_precio_luz_entity.attributes.get("unit_of_measurement", "€/kWh")
+        else:
+            return "€/kWh"
+
+    async def async_added_to_hass(self):
+        """Register update callback when added to hass."""
+        paused_switch_id = f"{self.ip_address}_Paused"
+        v2c_carga_pvpc_switch_id = f"v2c_carga_pvpc"
+        max_price_entity_id = "v2c_MaxPrice"
+
+        async def update_state(event_time):
+            precio_luz_entity = self.v2c_precio_luz_entity
+
+            entity_registry_instance = entity_registry.async_get(self.hass)
+            for entity_id, entity_entry in entity_registry_instance.entities.items():
+                if entity_entry.unique_id == paused_switch_id:
+                    paused_switch = self.hass.data["switch"].get_entity(entity_id)
+                if entity_entry.unique_id == v2c_carga_pvpc_switch_id:
+                    v2c_carga_pvpc_switch = self.hass.data["switch"].get_entity(entity_id)
+                if entity_entry.unique_id == max_price_entity_id:
+                    max_price_entity = self.hass.states.get(entity_id)
+            
+            if all([precio_luz_entity, paused_switch, v2c_carga_pvpc_switch, max_price_entity]):
+                max_price = float(max_price_entity.state)
+                if v2c_carga_pvpc_switch.is_on:
+                    # Comprueba si el precio está entre max_price
+                    if float(self.state) <= max_price:
+                        self.hass.async_create_task(paused_switch.async_turn_off())
+                    else:
+                        self.hass.async_create_task(paused_switch.async_turn_on())
+            else:
+                _LOGGER.debug("Hay entidades aun no creadas")
+                if precio_luz_entity is None:
+                    _LOGGER.debug(f"1 V2C precio_luz_entity: {precio_luz_entity}")
+                if paused_switch is None:
+                    _LOGGER.debug(f"1 V2C paused_switch: {paused_switch}")
+                if v2c_carga_pvpc_switch is None:
+                    _LOGGER.debug(f"1 V2C v2c_carga_pvpc_switch: {v2c_carga_pvpc_switch}")
+                if max_price_entity is None:
+                    _LOGGER.debug(f"1 V2C max_price_entity: {max_price_entity}")
+
+        await update_state(None)
+
+        async_track_time_interval(self.hass, update_state, timedelta(seconds=60))
