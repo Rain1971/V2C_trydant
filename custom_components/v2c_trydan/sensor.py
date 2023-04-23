@@ -3,6 +3,7 @@ import asyncio
 from datetime import timedelta, datetime
 
 import aiohttp
+import re
 import async_timeout
 import voluptuous as vol
 
@@ -95,7 +96,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
             precio_luz_entity = hass.states.get(CONF_PRECIO_LUZ)
 
     if all([precio_luz_entity]):
-        precio_luz_entity_instance = PrecioLuzEntity(coordinator, precio_luz_entity, ip_address)
+        precio_luz_entity_instance = PrecioLuzEntity(coordinator, precio_luz_entity, ip_address, config_entry)
         sensors.append(precio_luz_entity_instance)
         _LOGGER.debug("PrecioLuzEntity instance added to sensors list")
 
@@ -339,10 +340,13 @@ class NumericalStatus(CoordinatorEntity, SensorEntity):
         return "measurement"
 
 class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, precio_luz_entity, ip_address):
+    def __init__(self, coordinator, precio_luz_entity, ip_address, config_entry):
         super().__init__(coordinator)
         self.v2c_precio_luz_entity = precio_luz_entity
+        self.config_entry = config_entry
         self.ip_address = ip_address
+        self.valid_hours = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
+        self.total_hours = 24
 
     @property
     def unique_id(self):
@@ -362,7 +366,10 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
     @property
     def extra_state_attributes(self):
         if self.v2c_precio_luz_entity is not None:
-            return self.v2c_precio_luz_entity.attributes
+            attributes = self.v2c_precio_luz_entity.attributes.copy()
+            attributes["ValidHours"] = self.valid_hours
+            attributes["TotalHours"] = self.total_hours
+            return attributes
         else:
             return None
 
@@ -386,37 +393,80 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
         v2c_carga_pvpc_switch_id = f"v2c_carga_pvpc"
         max_price_entity_id = "v2c_MaxPrice"
 
-        async def update_state(event_time):
-            precio_luz_entity = self.v2c_precio_luz_entity
-
+        async def find_entities():
             entity_registry_instance = entity_registry.async_get(self.hass)
+            entities = {}
             for entity_id, entity_entry in entity_registry_instance.entities.items():
                 if entity_entry.unique_id == paused_switch_id:
-                    paused_switch = self.hass.data["switch"].get_entity(entity_id)
+                    entities["paused_switch"] = self.hass.data["switch"].get_entity(entity_id)
                 if entity_entry.unique_id == v2c_carga_pvpc_switch_id:
-                    v2c_carga_pvpc_switch = self.hass.data["switch"].get_entity(entity_id)
+                    entities["v2c_carga_pvpc_switch"] = self.hass.data["switch"].get_entity(entity_id)
                 if entity_entry.unique_id == max_price_entity_id:
-                    max_price_entity = self.hass.states.get(entity_id)
+                    entities["max_price_entity"] = self.hass.states.get(entity_id)
+            return entities
+
+        async def extract_price_attrs(precio_luz_entity, max_price, current_hour):
+            valid_hours = []
+            total_hours = 0
+            attributes = precio_luz_entity.attributes
+
+            for i in range(24):
+                price_attr = f"price_{i:02d}h"
+                next_day_price_attr = f"price_next_day_{i:02d}h"
+
+                if price_attr in attributes and float(attributes[price_attr]) <= max_price:
+                    if i > current_hour:
+                        valid_hours.append(i)
+                        total_hours += 1
+
+                if next_day_price_attr in attributes and float(attributes[next_day_price_attr]) <= max_price:
+                    valid_hours.append(i)
+                    total_hours += 1
+
+            return valid_hours, total_hours
+    
+        async def pause_or_resume_charging(current_state, max_price, paused_switch, v2c_carga_pvpc_switch):
+            if v2c_carga_pvpc_switch.is_on:
+                if float(current_state) <= max_price:
+                    await paused_switch.async_turn_off()
+                else:
+                    await paused_switch.async_turn_on()
+
+        async def update_state(event_time):
+            entities = await find_entities()
+            paused_switch = entities.get("paused_switch")
+            v2c_carga_pvpc_switch = entities.get("v2c_carga_pvpc_switch")
+            max_price_entity = entities.get("max_price_entity")
+            precio_luz_entity_id = self.config_entry.options.get(CONF_PRECIO_LUZ)
             
+            if precio_luz_entity_id:
+                await self.hass.services.async_call('homeassistant', 'update_entity', {'entity_id': precio_luz_entity_id})
+                precio_luz_entity = self.hass.states.get(precio_luz_entity_id)
+            else:
+                precio_luz_entity = None
+
             if all([precio_luz_entity, paused_switch, v2c_carga_pvpc_switch, max_price_entity]):
                 max_price = float(max_price_entity.state)
-                if v2c_carga_pvpc_switch.is_on:
-                    # Comprueba si el precio está entre max_price
-                    if float(self.state) <= max_price:
-                        self.hass.async_create_task(paused_switch.async_turn_off())
-                    else:
-                        self.hass.async_create_task(paused_switch.async_turn_on())
+                current_hour = datetime.now().hour
+
+                self.valid_hours, self.total_hours = await extract_price_attrs(
+                    precio_luz_entity, max_price, current_hour
+                )
+
+                self.extra_state_attributes["ValidHours"] = self.valid_hours
+                self.extra_state_attributes["TotalHours"] = self.total_hours
+
+                await pause_or_resume_charging(
+                    self.state, max_price, paused_switch, v2c_carga_pvpc_switch
+                )
+
+                self.v2c_precio_luz_entity = precio_luz_entity
+
+                self.async_write_ha_state()
             else:
                 _LOGGER.debug("Hay entidades aun no creadas")
-                if precio_luz_entity is None:
-                    _LOGGER.debug(f"1 V2C precio_luz_entity: {precio_luz_entity}")
-                if paused_switch is None:
-                    _LOGGER.debug(f"1 V2C paused_switch: {paused_switch}")
-                if v2c_carga_pvpc_switch is None:
-                    _LOGGER.debug(f"1 V2C v2c_carga_pvpc_switch: {v2c_carga_pvpc_switch}")
-                if max_price_entity is None:
-                    _LOGGER.debug(f"1 V2C max_price_entity: {max_price_entity}")
+
 
         await update_state(None)
 
-        async_track_time_interval(self.hass, update_state, timedelta(seconds=60))
+        async_track_time_interval(self.hass, update_state, timedelta(seconds=30))

@@ -255,6 +255,21 @@ cards:
       - entity: switch.v2c_trydan_switch_v2c_carga_pvpc
         name: Carga por Precio
       - entity: number.v2c_maxprice
+        name: Precio MAX para cargar
+      - type: custom:multiple-entity-row
+        entity: sensor.v2c_precio_luz
+        name: HORAS A LAS QUE CARGARÁ
+        icon: mdi:hours-24
+        show_state: false
+        secondary_info:
+          attribute: ValidHours
+      - type: custom:multiple-entity-row
+        entity: sensor.v2c_precio_luz
+        name: TOTAL HORAS
+        icon: mdi:sigma
+        show_state: false
+        secondary_info:
+          attribute: TotalHours
   - type: conditional
     conditions:
       - entity: switch.v2c_trydan_switch_dynamic
