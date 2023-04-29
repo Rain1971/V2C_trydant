@@ -46,7 +46,7 @@ class V2CtrydanOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry):
         self.config_entry = config_entry
         self.current_kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 20.8)
-        self.current_precio_luz = config_entry.options.get(CONF_PRECIO_LUZ, "sensor.precio_luz")
+        self.current_precio_luz = config_entry.options.get(CONF_PRECIO_LUZ, "sensor.pvpc")
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
