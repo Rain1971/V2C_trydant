@@ -5,37 +5,37 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Rain1971/V2C_trydant/blob/main/README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/Rain1971/V2C_trydant/blob/main/README.es.md)
 
-This integration exposes the information and functions made available by [V2C trydan](https://v2charge.com/trydan/) directly via http interface in Home Assistant.
+Esta integración expone la información y funciones disponibles en [V2C trydan](https://v2charge.com/trydan/) directamente a través de la interfaz http en Home Assistant.
 
-# Prerequisites
+# Prerequisitos:
 
-This integration supports network connection to V2C trydan directly, so that take note of the V2C trydan static IP address previously. 
+Esta integración soporta la conexión de red a V2C trydan directamente, por lo que toma nota de la dirección IP estática de V2C trydan previamente.
 
-For a later configuration, you need to know the electrical consumption data of your car expressed in Kwh per 100 km
+Para una configuración posterior, necesitarás conocer los datos de consumo eléctrico de tu coche expresados en Kwh por 100 km
 
-If you want to use the price-based load control feature, you must install the following integrations for lovelace, from HACS:
+Si quieres usar la función de control de carga basada en el precio, debes instalar las siguientes integraciones para lovelace, desde HACS:
 - [PVPC Hourly Pricing Card](https://github.com/danimart1991/pvpc-hourly-pricing-card) 
 - [multiple-entity-row](https://github.com/benct/lovelace-multiple-entity-row)
 
-# Setup:
+# Instalación:
 
-* Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
+* Añade este repositorio en HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
 ![Charts](./images/install1.png)
 ![Charts](./images/install2.png)
-* restart Home Assistant
-* Go to Configuration -> Integrations -> Add Integration
+* Reinicia Home Assistant
+* Ve a Configuración -> Integraciones -> Añadir Integración
 ![Charts](./images/install3.png)
 ![Charts](./images/install4.png)
-* Add integration and put there your device IP
-* Go to the v2C integration. Now, there are 28 entities. Press on settings and set:
-   - Kwh x 100Km of your car (default: 22)
-   - Sensor.pvpc  ->( add this only if you want to control your car charge based on the price of electricity. See PVPC Hourly Pricing Card )
+* Añade la integración y pon la IP de tu dispositivo
+* Ve a la integración de V2C. Ahota hay 28 entidades. Pulsa en ajustes y configura:
+   - Kwh x 100Km de tu coche (por defecto: 22)
+   - Sensor.pvpc  ->( añade esto solo si quieres controlar la carga de tu coche en función del precio de la electricidad. Ver PVPC Hourly Pricing Card )
    ![Charts](./images/install5.png)
-* Press 'Send' and it create a new entity: sensor.v2c_precio_luz. Now there are 29 entities.
-* Restart Home Assistant
+* Pulsa 'Enviar' y se creará una nueva entidad: sensor.v2c_precio_luz. Ahora hay 29 entidades.
+* Reinicia Home Assistant
 # Entities:
 
-The following entities are created:  
+Se crean las siguientes entidades:
 
 | Name                               | Type    | R/W  | Units        | Description                                    |
 | :--------------------------------- | :------ | :--- | :----------- | :--------------------------------------------- |
@@ -65,16 +65,17 @@ The following entities are created:
 | v2c_trydan_switch_v2c_carga_pvpc   | Switch | R/W | `on` `off`    | Toggle whether or not you want to charge while limiting by PVPC price . Default `off`
 
 
-# Events:
+# Eventos:
 
-The following events are created:  
+Los siguientes eventos son creados:
 
 | Event                              | Description                                   |
 | :--------------------------------- |:--------------------------------------------- |
 | v2c_trydan.charging_complete       | Event triggered when the energy corresponding to the selected kilometers has been charged. 
 
-# Examples:
-* You can also use a automation to check when device has changed the Km set:
+# Ejemplos:
+
+* Puedes también usar una automatización para comprobar cuando el dispositivo ha cambiado el Km establecido:
 ```
 alias: CARGA COCHE COMPLETA
 description: CARGA COMPLETA
@@ -94,7 +95,7 @@ action:
     enabled: true
 mode: single
 ```
-* Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/example.yaml) as lovelace example or copy this code:
+* Usa [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/example.yaml) como ejemplo para crear tu propio sensor de carga o simplemente copia y pega el siguiente código en tu configuración de Home Assistant:
 
 ```
 type: vertical-stack
@@ -195,7 +196,7 @@ cards:
           icon: mdi:current-ac
 ```
 
-OR USING pvpc control ( you need to configure pvpc on the integration config ):
+O USANDO control pvpc ( Necesitas tener configurado el sensor de pvpc ):
 ```
 type: vertical-stack
 cards:
