@@ -18,12 +18,19 @@ If you want to use the price-based load control feature, you must install the fo
 # Setup:
 
 * Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
+![Charts](./images/install1.png)
+![Charts](./images/install2.png)
+* restart Home Assistant
+* Go to Configuration -> Integrations -> Add Integration
+![Charts](./images/install3.png)
+![Charts](./images/install4.png)
 * Add integration and put there your device IP
 * Go to the v2C integration. Now, there are 28 entities. Press on settings and set:
    - Kwh x 100Km of your car (default: 22)
-   - Sensor.pvpc 
+   - Sensor.pvpc  ->( add this only if you want to control your car charge based on the price of electricity. See PVPC Hourly Pricing Card )
+   ![Charts](./images/install5.png)
 * Press 'Send' and it create a new entity: sensor.v2c_precio_luz. Now there are 29 entities.
-
+* Restart Home Assistant
 # Entities:
 
 The following entities are created:  
