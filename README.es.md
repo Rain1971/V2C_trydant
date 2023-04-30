@@ -1,4 +1,4 @@
-# CAR CHARGER V2C trydan component for HOME ASSISTANT
+# CARGADOR DE COCHE V2C TRYDAN para HOME ASSISTANT
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![GitHub release](https://img.shields.io/github/release/Rain1971/V2C_trydant.svg)](https://GitHub.com//Rain1971/V2C_trydant/releases/)
@@ -39,30 +39,30 @@ Se crean las siguientes entidades:
 
 | Name                               | Type    | R/W  | Units        | Description                                    |
 | :--------------------------------- | :------ | :--- | :----------- | :--------------------------------------------- |
-| v2c_trydan_sensor_chargeenergy     | Sensor | R   | N kWh      | Current charging session energy in kWh.        
-| v2c_trydan_sensor_chargekm  v2c_km_to_charge        | Sensor Number   | R \ W | N km     | Current charging session energy in Km.
-| v2c_trydan_sensor_chargepower      | Sensor | R   | N W        | Current charging power in Watts.
-| v2c_trydan_sensor_chargestate      | Sensor | R   | S `values`    | Charge Point. Spanish string States: `Manguera no conectada`, `Manguera conectada (NO CARGA)`,`Manguera conectada (CARGANDO)`
-| v2c_trydan_numericalstatus         | Sensor | R   | N `values`    | Charge Point. Numerical Status: `0`-Hose Not connected, `1`-Hose Connected (BUT NOT CHARGING),`2`-Hose Connected (CHARGING)
-| v2c_trydan_sensor_chargetime       | Sensor | R   | N s        | Current charging session time. 
-| v2c_trydan_sensor_contractedpower  | Sensor | R   | N W        | House Contracted Power in Watts. Default `-1`
-| vc2_trydan_sensor_dynamic          | Sensor | R   | N `values`    | Dynamic Intensity Modulation state: `0`-Disabled, `1`-Enabled
-| vc2_trydan_sensor_dynamicpowermode | Sensor | R   | N `values`    | Dynamic Mode: 0 Timed Power enabled; `1`-Timed Power Disabled, `2`-Timed Power Disabled and Exclusive Mode setted, `3`-Timed Power Disabled and Min Power Mode setted, `4`-Timed Power Disabled and Grid+FV mode setted, `5`-Timed Power Disabled and Stop Mode setted
-| vc2_trydan_sensor_fvpower          | Sensor | R   | N W        | Photovoltaic power generation in Watts.
-| vc2_trydan_sensor_housepower       | Sensor | R   | N W        | House power consumption in Watts.
+| v2c_trydan_sensor_chargeenergy     | Sensor | R   | N kWh      | Energía cargada en la sesión en kWh.        
+| v2c_trydan_sensor_chargekm  v2c_km_to_charge        | Sensor Number   | R \ W | N km     | Cantidad de Km cargados en la sesión en Km.
+| v2c_trydan_sensor_chargepower      | Sensor | R   | N W        | Potencia de carga atual en Watts.
+| v2c_trydan_sensor_chargestate      | Sensor | R   | S `values`    | Estado de la carga en texto: `Manguera no conectada`, `Manguera conectada (NO CARGA)`,`Manguera conectada (CARGANDO)`
+| v2c_trydan_numericalstatus         | Sensor | R   | N `values`    | Estado de la carga. En numero: `0`-Hose Not connected, `1`-Hose Connected (BUT NOT CHARGING),`2`-Hose Connected (CHARGING)
+| v2c_trydan_sensor_chargetime       | Sensor | R   | N s        | Tiempo desde que se conecto la manguera. 
+| v2c_trydan_sensor_contractedpower  | Sensor | R   | N W        | Potencia contratada Watts. Por defecto `-1`
+| vc2_trydan_sensor_dynamic          | Sensor | R   | N `values`    | Control de corriente dinámico: `0`-Desactivado, `1`-Activo
+| vc2_trydan_sensor_dynamicpowermode | Sensor | R   | N `values`    | Modo Dynamico: 0 Timed Power enabled; `1`-Timed Power Disabled, `2`-Timed Power Disabled and Exclusive Mode setted, `3`-Timed Power Disabled and Min Power Mode setted, `4`-Timed Power Disabled and Grid+FV mode setted, `5`-Timed Power Disabled and Stop Mode setted
+| vc2_trydan_sensor_fvpower          | Sensor | R   | N W        | Generacion fotovoltaica en [w].
+| vc2_trydan_sensor_housepower       | Sensor | R   | N W        | Consumo total de casa en [w].
 | v2c_trydan_sensor_intensity \   v2c_intensity      | Sensor Number | R \ W | N A        | Intensity offered by Charge Point in Amps, **if Dynamic Charge is disabled**. 
-| v2c_trydan_sensor_locked           | Sensor | R   | N `values`    | Disabling state of Charge Point: `0`-Enabled, `1`-Disabled 
-| v2c_trydan_sensor_maxintensity  v2c_max_intensity   | Sensor Number   | R \ W | N A        | Intensity offered maximun limit in Amps, **if Dynamic Charge is enabled**. (max default 32A)
-| v2c_trydan_sensor_minintensity  v2c_min_intensity     | Sensor Number | R \ W | N A        | Intensity offered minimun limit in Amps, **if Dynamic Charge is enabled**. (max default 6A)
-| v2c_trydan_sensor_paused           | Sensor | R   | N `values`    | Pause state of current charging session: `0`-Enabled, `1`-Disabled                
-| v2c_trydan_sensor_pausedynamic     | Sensor | R   | N `values`    | Dynamic Control Modulation Pause State: `0`-Modulating, `1`-No Modulating
-| v2c_trydan_sensor_slaveerror       | Sensor | R   | N `values`    | Slave communication state: `0`-No error, `1`-error message, `2`-Communication error
-| v2c_trydan_sensor_timer            | Sensor | R   | N `values`    | Charge Point Timer state: `1`-Timer ON, `0`-Timer OFF
-| v2c_precio_luz                     | Sensor | R   | state `attributes` | Data retrieved from api.esios.ree.es by REE. The `state` contains the current price and also these attributes: `state_class`, `measurement`, `tariff`, `period`, `available_power`, `next_period`, `hours_to_next_period`, `next_better_price`, `hours_to_better_price`,  `num_better_prices_ahead`, `price_position`, `price_ratio`, `max_price`, `max_price_at`, `min_price`, `min_price_at`, `next_best_at`, `price_00h` to `price_23h`, `unit_of_measurement`, `attribution`, `icon`, `friendly_name`, `ValidHours` (show at what times it will charge with that maximum price) and `TotalHours` (contains the total number of charging hours). These last two values are updated every 30 seconds and only if number.v2c_maxprice > 0 
-| vc2_trydan_switch_dynamic          | Switch | R/W | `on` `off`    | Toggle to dynamic charge. Default `off`                       
-| v2c_trydan_switch_paused           | Switch | R/W | `on` `off`    | Toggle to pause charge. Default `off`                        
-| v2c_trydan_switch_locked           | Switch | R/W | `on` `off`    | Toggle to block the charger. Default `off`
-| v2c_trydan_switch_v2c_carga_pvpc   | Switch | R/W | `on` `off`    | Toggle whether or not you want to charge while limiting by PVPC price . Default `off`
+| v2c_trydan_sensor_locked           | Sensor | R   | N `values`    | Bloquear el punto de carga: `0`-Activo, `1`-Desactivado 
+| v2c_trydan_sensor_maxintensity  v2c_max_intensity   | Sensor Number   | R \ W | N A        | Corriente máxima en amperios [A], **Solo si carga dinámica está activa**. (por defecto 32A)
+| v2c_trydan_sensor_minintensity  v2c_min_intensity     | Sensor Number | R \ W | N A        | Corriente mínima en amperios [A], **Solo si carga dinámica está activa**. (por defecto 6A)
+| v2c_trydan_sensor_paused           | Sensor | R   | N `values`    | Estado de la pausa: `0`-Enabled, `1`-Disabled                
+| v2c_trydan_sensor_pausedynamic     | Sensor | R   | N `values`    | Estado de la carga dinámica: `0`-Modulando, `1`-No Modulando
+| v2c_trydan_sensor_slaveerror       | Sensor | R   | N `values`    | Estado comunicacion con esclavo: `0`-Sin error, `1`-Mensaje erroneo, `2`-Error de comunicación
+| v2c_trydan_sensor_timer            | Sensor | R   | N `values`    | Sensor de tiempo de carga: `1`-Timer Activo, `0`-Timer Parado
+| v2c_precio_luz                     | Sensor | R   | state `attributes` | Datos tomados api.esios.ree.es por REE. El `state` contiene el precio actual y los atributos: `state_class`, `measurement`, `tariff`, `period`, `available_power`, `next_period`, `hours_to_next_period`, `next_better_price`, `hours_to_better_price`,  `num_better_prices_ahead`, `price_position`, `price_ratio`, `max_price`, `max_price_at`, `min_price`, `min_price_at`, `next_best_at`, `price_00h` to `price_23h`, `unit_of_measurement`, `attribution`, `icon`, `friendly_name`, `ValidHours` (muestra a que horas cargará si limitamos con este precio) and `TotalHours` (muestra el total de horas que cargará si limitamos con este precio). Estos 2 se actualiza cada 30s solo si number.v2c_maxprice > 0 
+| vc2_trydan_switch_dynamic          | Switch | R/W | `on` `off`    | Interruptor de carga dinamica. Por defecto `off`                       
+| v2c_trydan_switch_paused           | Switch | R/W | `on` `off`    | Interruptor de pausa. Por defecto `off`                        
+| v2c_trydan_switch_locked           | Switch | R/W | `on` `off`    | Interruptor de bloqueo. Por defecto `off`
+| v2c_trydan_switch_v2c_carga_pvpc   | Switch | R/W | `on` `off`    | Interruptor de para hacer la carga a un precio máximo. Por defecto `off`
 
 
 # Eventos:
@@ -71,7 +71,7 @@ Los siguientes eventos son creados:
 
 | Event                              | Description                                   |
 | :--------------------------------- |:--------------------------------------------- |
-| v2c_trydan.charging_complete       | Event triggered when the energy corresponding to the selected kilometers has been charged. 
+| v2c_trydan.charging_complete       | Evento que sucede si has marcado un numero total de Km a cargar y sucede cuando ha cargado. 
 
 # Ejemplos:
 
