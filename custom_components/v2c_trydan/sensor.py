@@ -251,7 +251,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
 
     async def handle_km_to_charge_state_change(self, event):
         entity_id = event.data.get("entity_id")
-        
+
         if entity_id == "number.v2c_km_to_charge":
             old_state = event.data.get("old_state")
             new_state = event.data.get("new_state")
@@ -324,7 +324,7 @@ class NumericalStatus(CoordinatorEntity, SensorEntity):
 
     @property
     def state(self):
-        Charge_State = self.coordinator.data.get("ChargeState", "0")      
+        Charge_State = self.coordinator.data.get("ChargeState", "0")
         if Charge_State == "Manguera no conectada":
             return 0
         elif Charge_State == "Manguera conectada (NO CARGA)":
@@ -332,7 +332,7 @@ class NumericalStatus(CoordinatorEntity, SensorEntity):
         elif Charge_State == "Manguera conectada (CARGANDO)":
             return 2
         else:
-            return Charge_State  
+            return Charge_State
         return -1
 
     @property
@@ -346,6 +346,7 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
         self.config_entry = config_entry
         self.ip_address = ip_address
         self.valid_hours = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
+        self.valid_hours_next_day = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
         self.total_hours = 24
 
     @property
@@ -368,6 +369,7 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
         if self.v2c_precio_luz_entity is not None:
             attributes = self.v2c_precio_luz_entity.attributes.copy()
             attributes["ValidHours"] = self.valid_hours
+            attributes["ValidHoursNextDay"] = self.valid_hours_next_day
             attributes["TotalHours"] = self.total_hours
             return attributes
         else:
@@ -407,6 +409,7 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
 
         async def extract_price_attrs(precio_luz_entity, max_price, current_hour):
             valid_hours = []
+            valid_hours_next_day = []
             total_hours = 0
             attributes = precio_luz_entity.attributes
 
@@ -420,11 +423,11 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
                         total_hours += 1
 
                 if next_day_price_attr in attributes and float(attributes[next_day_price_attr]) <= max_price:
-                    valid_hours.append(i)
+                    valid_hours_next_day.append(i)
                     total_hours += 1
 
-            return valid_hours, total_hours
-    
+            return valid_hours, valid_hours_next_day, total_hours
+
         async def pause_or_resume_charging(current_state, max_price, paused_switch, v2c_carga_pvpc_switch):
             if v2c_carga_pvpc_switch.is_on:
                 if float(current_state) <= max_price:
@@ -438,7 +441,7 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
             v2c_carga_pvpc_switch = entities.get("v2c_carga_pvpc_switch")
             max_price_entity = entities.get("max_price_entity")
             precio_luz_entity_id = self.config_entry.options.get(CONF_PRECIO_LUZ)
-            
+
             if precio_luz_entity_id:
                 await self.hass.services.async_call('homeassistant', 'update_entity', {'entity_id': precio_luz_entity_id})
                 precio_luz_entity = self.hass.states.get(precio_luz_entity_id)
@@ -449,11 +452,12 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
                 max_price = float(max_price_entity.state)
                 current_hour = datetime.now().hour
 
-                self.valid_hours, self.total_hours = await extract_price_attrs(
+                self.valid_hours, self.valid_hours_next_day, self.total_hours = await extract_price_attrs(
                     precio_luz_entity, max_price, current_hour
                 )
 
                 self.extra_state_attributes["ValidHours"] = self.valid_hours
+                self.extra_state_attributes["ValidHoursNextDay"] = self.valid_hours_next_day
                 self.extra_state_attributes["TotalHours"] = self.total_hours
 
                 await pause_or_resume_charging(
