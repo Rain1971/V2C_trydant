@@ -17,20 +17,27 @@ If you want to use the price-based load control feature, you must install the fo
 - [PVPC Hourly Pricing Card](https://github.com/danimart1991/pvpc-hourly-pricing-card) 
 - [multiple-entity-row](https://github.com/benct/lovelace-multiple-entity-row)
 
+
+
 # Setup:
 
 * Add this repository in HACS ( [https://github.com/Rain1971/V2C_trydant.git](https://github.com/Rain1971/V2C_trydant.git) )
-![Charts](./images/install1.png)
-![Charts](./images/install2.png)
-* restart Home Assistant
+
+<img src="./images/install1.png" width="300">
+
+<img src="./images/install2.png" width="350">
+
+* Restart Home Assistant
 * Go to Configuration -> Integrations -> Add Integration
-![Charts](./images/install3.png)
-![Charts](./images/install4.png)
+<img src="./images/install3.png" width="220">
+<img src="./images/install4.png" width="350">
+
 * Add integration and put there your device IP
 * Go to the v2C integration. Now, there are 28 entities. Press on settings and set:
-   - Kwh x 100Km of your car (default: 22)
+   - kWh x 100Km of your car (default: 20.8 kWh/100km)
    - Sensor.pvpc  ->( add this only if you want to control your car charge based on the price of electricity. See PVPC Hourly Pricing Card )
-   ![Charts](./images/install5.png)
+   - Car battery capacity (defaut: 75 kWh)
+   <img src="./images/install5.png" width="350">
 * Press 'Send' and it create a new entity: sensor.v2c_precio_luz. Now there are 29 entities.
 * Restart Home Assistant
 # Entities:
@@ -52,7 +59,7 @@ The following entities are created:
 | vc2_trydan_sensor_housepower       | Sensor | R   | N W        | House power consumption in Watts.
 | v2c_trydan_sensor_intensity \   v2c_intensity      | Sensor Number | R \ W | N A        | Intensity offered by Charge Point in Amps, **if Dynamic Charge is disabled**. 
 | v2c_trydan_sensor_locked           | Sensor | R   | N `values`    | Disabling state of Charge Point: `0`-Enabled, `1`-Disabled 
-| v2c_trydan_sensor_maxintensity  v2c_max_intensity   | Sensor Number   | R \ W | N A        | Intensity offered maximun limit in Amps, **if Dynamic Charge is enabled**. (max default 32A)
+| v2c_trydan_sensor_maxintensity  v2c_max_intensity   | Sensor Nuber   | R \ W | N A        | Intensity offered maximun limit in Amps, **if Dynamic Charge is enabled**. (max default 32A)
 | v2c_trydan_sensor_minintensity  v2c_min_intensity     | Sensor Number | R \ W | N A        | Intensity offered minimun limit in Amps, **if Dynamic Charge is enabled**. (max default 6A)
 | v2c_trydan_sensor_paused           | Sensor | R   | N `values`    | Pause state of current charging session: `0`-Enabled, `1`-Disabled                
 | v2c_trydan_sensor_pausedynamic     | Sensor | R   | N `values`    | Dynamic Control Modulation Pause State: `0`-Modulating, `1`-No Modulating
@@ -63,6 +70,8 @@ The following entities are created:
 | v2c_trydan_switch_paused           | Switch | R/W | `on` `off`    | Toggle to pause charge. Default `off`                        
 | v2c_trydan_switch_locked           | Switch | R/W | `on` `off`    | Toggle to block the charger. Default `off`
 | v2c_trydan_switch_v2c_carga_pvpc   | Switch | R/W | `on` `off`    | Toggle whether or not you want to charge while limiting by PVPC price . Default `off`
+| v2c_trydan_switch_v2c_smart_charge | Switch | R/W | `on` `off`    | Toggle whether or not you want to charge using the smart charge algorithm, which takes into account: current battery charge percentage, available charging power, assumes that battery must be at 80% within the following 12 hours. With all this information it will select the cheapest hours according to PVPC to charge the car. Default `off`
+
 
 
 # Events:
