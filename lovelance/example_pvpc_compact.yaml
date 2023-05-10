@@ -1,0 +1,126 @@
+type: vertical-stack
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-chips-card
+        alignment: center
+        chips:
+          - type: entity
+            entity: sensor.v2c_trydan_sensor_intensity
+            use_entity_picture: false
+            tap_action:
+              action: more-info
+          - type: entity
+            entity: sensor.v2c_trydan_sensor_chargeenergy
+            use_entity_picture: false
+            tap_action:
+              action: more-info
+          - type: entity
+            entity: sensor.v2c_trydan_sensor_chargekm
+            use_entity_picture: false
+            tap_action:
+              action: more-info
+          - type: entity
+            icon: mdi:timer-outline
+            entity: sensor.v2c_trydan_sensor_chargetime
+            use_entity_picture: false
+            tap_action:
+              action: more-info
+  - type: horizontal-stack
+    cards:
+      - type: gauge
+        entity: sensor.v2c_trydan_sensor_fvpower
+        severity:
+          green: 0
+          yellow: 8000
+          red: 9500
+        needle: true
+        min: 0
+        max: 10000
+        name: Producción FV
+      - type: gauge
+        entity: sensor.v2c_trydan_sensor_housepower
+        name: Consumo hogar
+        severity:
+          green: 0
+          yellow: 6000
+          red: 9000
+        needle: true
+        min: 0
+        max: 12000
+      - type: gauge
+        entity: sensor.v2c_trydan_sensor_chargepower
+        name: Cargando en el coche
+        needle: true
+        min: 0
+        max: 8000
+        severity:
+          green: 0
+          yellow: 5000
+          red: 6500
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: switch.v2c_trydan_switch_paused
+        name: Pausar
+      - type: custom:mushroom-entity-card
+        entity: switch.v2c_trydan_switch_locked
+        name: Bloqueo
+      - type: custom:mushroom-entity-card
+        entity: switch.v2c_trydan_switch_dynamic
+        name: Dinamico
+  - type: entities
+    entities:
+      - entity: sensor.v2c_trydan_sensor_chargestate
+        name: Estado
+        icon: mdi:ev-station
+      - entity: number.v2c_km_to_charge
+        name: Km a Cargar
+        secondary_info: last-changed
+        icon: mdi:car-arrow-right
+      - entity: sensor.v2c_precio_luz
+      - entity: switch.v2c_trydan_switch_v2c_carga_pvpc
+        name: Carga por Precio
+        icon: mdi:cash
+  - type: conditional
+    conditions:
+      - entity: switch.v2c_trydan_switch_v2c_carga_pvpc
+        state: 'on'
+    card:
+      type: entities
+      entities:
+        - entity: number.v2c_maxprice
+          name: Precio MAX para cargar
+        - type: custom:multiple-entity-row
+          entity: sensor.v2c_precio_luz
+          name: Horas carga
+          icon: mdi:hours-24
+          show_state: false
+          entities:
+            - attribute: ValidHours
+              name: Hoy
+              hide_if: '-'
+              styles:
+                font-size: x-small
+            - attribute: ValidHoursNextDay
+              name: Mañana
+              hide_if: '-'
+              styles:
+                font-size: x-small
+            - attribute: TotalHours
+              name: Horas
+              styles:
+                font-size: x-small
+  - type: conditional
+    conditions:
+      - entity: switch.v2c_trydan_switch_dynamic
+        state: 'on'
+    card:
+      type: entities
+      entities:
+        - entity: number.v2c_min_intensity
+          name: Ajusta Imin dinámica
+          icon: mdi:current-ac
+        - entity: number.v2c_max_intensity
+          name: Ajusta Imax dinámica
+          icon: mdi:current-ac
