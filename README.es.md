@@ -98,8 +98,8 @@ mode: single
 
 # Ejemplos PANTALLA:
 
-* Use [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/lovelance/example.yaml)
-* For pvpc Control [example_pvpc.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/lovelance/example_pvpc.yaml)
-* For pvpc Control, compacted version [example_pvpc_compact.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/lovelance/example_pvpc_compact.yaml)
+* Usa [example.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/lovelance/example.yaml)
+* Para Control pvpc [example_pvpc.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/lovelance/example_pvpc.yaml)
+* Para Control pvpc, version compacta [example_pvpc_compact.yaml](https://raw.githubusercontent.com/Rain1971/V2C_trydant/main/lovelance/example_pvpc_compact.yaml)
 
 ![Charts](./images/example_pvpc_compact.png)
