@@ -188,8 +188,8 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
                 self.carga_previo = 0
                 return "Manguera no conectada"
             elif current == 1:
-                if self.carga_previo == 2:
-                    self.hass.bus.async_fire("v2c_trydan.charging_complete")
+                #if self.carga_previo == 2:
+                #    self.hass.bus.async_fire("v2c_trydan.charging_complete")
                 self.carga_previo = 1
                 return "Manguera conectada (NO CARGA)"
             elif current == 2:
