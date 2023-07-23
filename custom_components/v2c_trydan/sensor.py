@@ -301,7 +301,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     @property
     def state(self):
         charge_energy = self.coordinator.data.get("ChargeEnergy", 0)
-        charge_km = charge_energy / ((self._kwh_per_100km / 100) * 0.8)
+        charge_km = charge_energy * 0.8 / ((self._kwh_per_100km / 100))
         return round(charge_km, 2)
 
     @property
