@@ -58,7 +58,7 @@ DEVICE_CLASS_MAP = {
 }
 
 STATE_CLASS_MAP = {
-    "ChargeEnergy": "total"
+    "ChargeEnergy": "total_increasing"
 }
 
 NATIVE_UNIT_MAP = {
