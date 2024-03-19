@@ -41,6 +41,13 @@ async def async_setup_entry(hass: HomeAssistant, entry):
         else:
             _LOGGER.error("min_intensity must be between 6 and 32")
 
+    async def set_dynamic_power_mode(call: ServiceCall):
+        DynamicPowerMode = call.data.get("DynamicPowerMode")
+        if 0 <= int(DynamicPowerMode) <= 7:
+            await async_set_dynamic_power_mode(hass, ip_address, DynamicPowerMode)
+        else:
+            _LOGGER.error("DynamicPowerMode must be between 0 and 7")            
+
     async def set_max_intensity(call):
         max_intensity = call.data["max_intensity"]
         if 6 <= int(max_intensity) <= 32:
@@ -67,7 +74,21 @@ async def async_setup_entry(hass: HomeAssistant, entry):
             else:
                 _LOGGER.error("v2c_min_intensity must be between 6 and 32")
         else:
-            _LOGGER.error("v2c_max_intensity not provided")
+            _LOGGER.error("v2c_min_intensity not provided")
+
+    async def set_dynamic_power_mode_slider(call):
+        dynamic_power_mode = call.data.get("v2c_dynamic_power_mode")
+        if dynamic_power_mode is not None:
+            if 0 <= int(dynamic_power_mode) <= 7:
+                if entry:
+                    ip_address = entry.data[CONF_IP_ADDRESS]
+                    await async_set_dynamic_power_mode(hass, ip_address, dynamic_power_mode)
+                else:
+                    _LOGGER.error(f"Entity ID not found: {entity_id}")
+            else:
+                _LOGGER.error("v2c_dynamic_power_mode must be between 0 and 7")
+        else:
+            _LOGGER.error("v2c_dynamic_power_mode not provided")
 
     async def set_max_intensity_slider(call):
         max_intensity = call.data.get("v2c_max_intensity")
@@ -85,9 +106,11 @@ async def async_setup_entry(hass: HomeAssistant, entry):
 
     hass.services.async_register(DOMAIN, "set_min_intensity", set_min_intensity)
     hass.services.async_register(DOMAIN, "set_max_intensity", set_max_intensity)
+    hass.services.async_register(DOMAIN, "set_dynamic_power_mode", set_dynamic_power_mode)
     hass.services.async_register(DOMAIN, "set_intensity", set_intensity)
     hass.services.async_register(DOMAIN, "set_min_intensity_slider", set_min_intensity_slider)
     hass.services.async_register(DOMAIN, "set_max_intensity_slider", set_max_intensity_slider)
+    hass.services.async_register(DOMAIN, "set_dynamic_power_mode_slider", set_dynamic_power_mode_slider)
 
     return True
 
@@ -108,6 +131,16 @@ async def async_set_max_intensity(hass, ip_address: str, max_intensity):
     #_LOGGER.debug(f"Setting max intensity to {max_intensity}")
     async with aiohttp.ClientSession() as session:
         url = f"http://{ip_address}/write/MaxIntensity={max_intensity}"
+        try:
+            async with session.get(url) as response:
+                response.raise_for_status()
+        except aiohttp.ClientError as err:
+            _LOGGER.error(f"Error communicating with API: {err}")
+
+async def set_dynamic_power_mode(hass: HomeAssistant, ip_address: str, min_intensity: int):
+    #_LOGGER.debug(f"Setting dynamic power mode to {dynamic_power_mode}")
+    async with aiohttp.ClientSession() as session:
+        url = f"http://{ip_address}/write/DynamicPowerMode={dynamic_power_mode}"
         try:
             async with session.get(url) as response:
                 response.raise_for_status()

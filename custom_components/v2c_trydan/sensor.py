@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 
 import aiohttp
 import re
@@ -112,6 +112,15 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
         self.imin_old = 0
         self.i_old = 0
         self.carga_previo = 0
+        self._last_reset = None
+
+    @property
+    def last_reset(self):
+        if self.state_class == "total":
+            if self.state == 0:
+                self._last_reset = datetime.now(timezone.utc)
+            return self._last_reset
+        return None
 
     @property
     def unique_id(self):
@@ -284,11 +293,15 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
 
         km_to_charge = self.hass.states.get("number.v2c_km_to_charge")
         if km_to_charge is not None:
-            km_to_charge = float(km_to_charge.state)
-            if self.state >= km_to_charge and km_to_charge != 0:
-                await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
-                await self.async_set_km_to_charge(0)
-                self.hass.bus.async_fire("v2c_trydan.charging_complete")
+            try:
+                km_to_charge = float(km_to_charge.state)
+                if self.state >= km_to_charge and km_to_charge != 0:
+                    await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
+                    await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_locked"})
+                    await self.async_set_km_to_charge(0)
+                    self.hass.bus.async_fire("v2c_trydan.charging_complete")
+            except ValueError:
+                _LOGGER.error(f"El estado de 'km_to_charge' no es convertible a float: {km_to_charge.state}")
 
     @property
     def unique_id(self):

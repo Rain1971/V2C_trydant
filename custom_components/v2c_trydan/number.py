@@ -10,6 +10,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     async_add_entities([MaxIntensityNumber(hass)])
     async_add_entities([MinIntensityNumber(hass)])
+    async_add_entities([DynamicPowerModeNumber(hass)])
     async_add_entities([KmToChargeNumber(hass)])
     async_add_entities([IntensityNumber(hass)])
     async_add_entities([MaxPrice(hass)])
@@ -95,6 +96,47 @@ class MinIntensityNumber(NumberEntity):
             self.async_write_ha_state()
         else:
             _LOGGER.error("v2c_min_intensity must be between 6 and 32")
+
+class DynamicPowerModeNumber(NumberEntity):
+    def __init__(self, hass):
+        self._hass = hass
+        self._state = 0
+
+    @property
+    def unique_id(self):
+        return "v2c_dynamic_power_mode"
+
+    @property
+    def name(self):
+        return "v2c_dynamic_power_mode"
+
+    @property
+    def icon(self):
+        return "mdi:car"
+
+    @property
+    def native_unit_of_measurement(self):
+        return ""
+
+    @property
+    def native_value(self):
+        return self._state
+
+    @property
+    def native_max_value(self):
+        return 7
+
+    @property
+    def native_min_value(self):
+        return 0
+
+    async def async_set_native_value(self, value):
+        if 0 <= value <= 7:
+            await self._hass.services.async_call(DOMAIN, "set_dynamic_power_mode_slider", {"v2c_dynamic_power_mode": value})
+            self._state = value
+            self.async_write_ha_state()
+        else:
+            _LOGGER.error("v2c_dynamic_power_mode must be between 0 and 7")
 
 class KmToChargeNumber(NumberEntity):
     def __init__(self, hass):
