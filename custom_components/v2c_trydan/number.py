@@ -1,10 +1,8 @@
-from homeassistant.components.number import NumberEntity, RestoreNumber
+from homeassistant.components.number import NumberEntity
 from homeassistant.const import DEVICE_DEFAULT_NAME
-from homeassistant.core import callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers import config_validation as cv
 import logging
-from .const import DOMAIN, DATA_UPDATED
+from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -140,7 +138,7 @@ class DynamicPowerModeNumber(NumberEntity):
         else:
             _LOGGER.error("v2c_dynamic_power_mode must be between 0 and 7")
 
-class KmToChargeNumber(RestoreNumber):
+class KmToChargeNumber(NumberEntity):
     def __init__(self, hass):
         self._hass = hass
         self._state = 0
@@ -179,21 +177,6 @@ class KmToChargeNumber(RestoreNumber):
             self.async_write_ha_state()
         else:
             _LOGGER.error("v2c_km_to_charge must be between 0 and 1000")
-
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        value = await self.async_get_last_number_data()
-        if not value:
-            return
-        self._state = value.native_value
-
-        async_dispatcher_connect(
-            self._hass, DATA_UPDATED, self._schedule_immediate_update
-        )
-
-    @callback
-    def _schedule_immediate_update(self):
-        self.async_schedule_update_ha_state(True)
 
 class IntensityNumber(NumberEntity):
     def __init__(self, hass):
@@ -236,7 +219,7 @@ class IntensityNumber(NumberEntity):
         else:
             _LOGGER.error("v2c_intensity must be between {} and {}".format(self.native_min_value, self.native_max_value))
 
-class MaxPrice(RestoreNumber):
+class MaxPrice(NumberEntity):
     def __init__(self, hass):
         self._hass = hass
         self._state = 0
@@ -275,18 +258,3 @@ class MaxPrice(RestoreNumber):
             self.async_write_ha_state()
         else:
             _LOGGER.error("v2c_MaxPrice must be between 0 and 1")
-
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        value = await self.async_get_last_number_data()
-        if not value:
-            return
-        self._state = value.native_value
-
-        async_dispatcher_connect(
-            self._hass, DATA_UPDATED, self._schedule_immediate_update
-        )
-
-    @callback
-    def _schedule_immediate_update(self):
-        self.async_schedule_update_ha_state(True)
