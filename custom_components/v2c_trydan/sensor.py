@@ -300,7 +300,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
                     km_to_charge_float = 0.0
                     _LOGGER.info(f"Se recibió un valor no numérico para km_to_charge: {km_to_charge.state}")
 
-                if self.state >= km_to_charge_float and km_to_charge != 0:
+                if self.state >= km_to_charge_float and km_to_charge_float != 0:
                     await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
                     await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_locked"})
                     await self.async_set_km_to_charge(0)
