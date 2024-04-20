@@ -295,18 +295,17 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         if km_to_charge is not None:
             try:
                 try:
-                    km_to_charge_float = float(km_to_charge.state) if km_to_charge.state.isnumeric() else 0.0
+                    km_to_charge_float = float(km_to_charge.state)
                 except ValueError:
-                    km_to_charge_float = 0.0
-                    _LOGGER.info(f"Se recibió un valor no numérico para km_to_charge: {km_to_charge.state}")
+                    km_to_charge_float = -1.0
 
                 if self.state >= km_to_charge_float and km_to_charge_float != 0:
                     await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_paused"})
                     await self.hass.services.async_call("switch", "turn_on", {"entity_id": "switch.v2c_trydan_switch_locked"})
                     await self.async_set_km_to_charge(0)
                     self.hass.bus.async_fire("v2c_trydan.charging_complete")
-            except ValueError:
-                _LOGGER.error(f"El estado de 'km_to_charge' no es convertible a float: {km_to_charge.state}")
+            except Exception as e:
+                _LOGGER.error(f"Error en carga de kilometros el valor esperado es: {km_to_charge.state} y el error {e}")
 
     @property
     def unique_id(self):
