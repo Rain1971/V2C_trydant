@@ -36,7 +36,6 @@ If you want to use the price-based load control feature, you must install the fo
 * Go to the v2C integration. Now, there are 28 entities. Press on settings and set:
    - kWh x 100Km of your car (default: 20.8 kWh/100km)
    - Sensor.pvpc  ->( add this only if you want to control your car charge based on the price of electricity. See PVPC Hourly Pricing Card )
-   - Car battery capacity (defaut: 75 kWh)
    <img src="./images/install5.png" width="350">
 * Press 'Send' and it create a new entity: sensor.v2c_precio_luz. Now there are 29 entities.
 * Restart Home Assistant
