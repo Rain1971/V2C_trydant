@@ -7,9 +7,11 @@ import voluptuous as vol
 
 from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
 from homeassistant.const import CONF_IP_ADDRESS
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -17,7 +19,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .coordinator import V2CtrydanDataUpdateCoordinator
-from .const import DOMAIN, CONF_PRECIO_LUZ
+from .const import DOMAIN, CONF_PRECIO_LUZ, DATA_UPDATED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,7 +84,7 @@ class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
         except Exception as e:
             _LOGGER.error(f"Error turning off switch: {e}")
 
-class V2CCargaPVPCSwitch(SwitchEntity):
+class V2CCargaPVPCSwitch(SwitchEntity, RestoreEntity):
     def __init__(self, precio_luz_entity):
         self._is_on = False
         self.precio_luz_entity = precio_luz_entity
@@ -107,3 +109,18 @@ class V2CCargaPVPCSwitch(SwitchEntity):
 
     async def async_turn_off(self, **kwargs):
         self._is_on = False
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        state = await self.async_get_last_state()
+        if not state:
+            return
+        self._is_on = state.state
+
+        async_dispatcher_connect(
+            self.hass, DATA_UPDATED, self._schedule_immediate_update
+        )
+
+    @callback
+    def _schedule_immediate_update(self):
+        self.async_schedule_update_ha_state(True)
