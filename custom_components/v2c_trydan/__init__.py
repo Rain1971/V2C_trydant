@@ -1,7 +1,7 @@
 """The v2c_trydan component."""
 from homeassistant.config_entries import SOURCE_IMPORT
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.const import CONF_IP_ADDRESS
+from homeassistant.const import CONF_IP_ADDRESS, Platform
 import logging
 import aiohttp
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -10,7 +10,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "v2c_trydan"
 
-PLATFORMS = ["sensor", "switch", "number"]
+PLATFORMS = [Platform.SENSOR, Platform.SWITCH, Platform.NUMBER]
 
 async def async_setup(hass: HomeAssistant, config: dict):
     hass.data.setdefault(DOMAIN, {})
@@ -28,8 +28,6 @@ async def async_setup(hass: HomeAssistant, config: dict):
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry):
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
     hass.data[DOMAIN]["ip_address"] = entry.data[CONF_IP_ADDRESS]
     ip_address = entry.data[CONF_IP_ADDRESS]
 
@@ -149,6 +147,8 @@ async def async_setup_entry(hass: HomeAssistant, entry):
     hass.services.async_register(DOMAIN, "set_min_intensity_slider", set_min_intensity_slider)
     hass.services.async_register(DOMAIN, "set_max_intensity_slider", set_max_intensity_slider)
     hass.services.async_register(DOMAIN, "set_dynamic_power_mode_slider", set_dynamic_power_mode_slider)
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
 
