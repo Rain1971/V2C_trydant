@@ -6,7 +6,7 @@ import async_timeout
 import voluptuous as vol
 
 from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
-from homeassistant.const import CONF_IP_ADDRESS
+from homeassistant.const import CONF_IP_ADDRESS, STATE_ON
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -115,7 +115,7 @@ class V2CCargaPVPCSwitch(SwitchEntity, RestoreEntity):
         state = await self.async_get_last_state()
         if not state:
             return
-        self._is_on = state.state
+        self._is_on = state.state == STATE_ON
 
         async_dispatcher_connect(
             self.hass, DATA_UPDATED, self._schedule_immediate_update

@@ -9,6 +9,7 @@ import voluptuous as vol
 
 from homeassistant.const import (
     CONF_NAME,
+    STATE_UNAVAILABLE,
     STATE_UNKNOWN,
     CONF_IP_ADDRESS,
 )
@@ -250,10 +251,6 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         self._kwh_per_100km = kwh_per_100km
         self._charging_paused = False
 
-    async def async_added_to_hass(self):
-        await super().async_added_to_hass()
-        async_track_time_interval(self.hass, self.check_and_pause_charging, timedelta(seconds=10))
-
     async def handle_paused_state_change(self, event: Event[EventStateChangedData]):
         old_state = event.data["old_state"]
         new_state = event.data["new_state"]
@@ -454,7 +451,7 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
             return valid_hours, valid_hours_next_day, total_hours
     
         async def pause_or_resume_charging(current_state, max_price, paused_switch, v2c_carga_pvpc_switch):
-            if v2c_carga_pvpc_switch.is_on:
+            if v2c_carga_pvpc_switch.is_on and current_state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
                 if float(current_state) <= max_price:
                     await paused_switch.async_turn_off()
                 else:
