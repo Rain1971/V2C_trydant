@@ -69,5 +69,3 @@ class V2CtrydanDataUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed("Error al parsear los datos JSON")
             else:
                 raise UpdateFailed("Error al parsear los datos JSON")
-
-
