@@ -28,6 +28,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry):
+  
     hass.data[DOMAIN]["ip_address"] = entry.data[CONF_IP_ADDRESS]
     ip_address = entry.data[CONF_IP_ADDRESS]
 
