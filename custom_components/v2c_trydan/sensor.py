@@ -9,10 +9,11 @@ import voluptuous as vol
 
 from homeassistant.const import (
     CONF_NAME,
+    STATE_UNAVAILABLE,
     STATE_UNKNOWN,
     CONF_IP_ADDRESS,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.components.sensor import (
     PLATFORM_SCHEMA,
     SensorEntity,
@@ -24,7 +25,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import (
     async_track_time_interval,
-    async_track_state_change,
+    async_track_state_change_event,
     async_call_later,
 )
 from homeassistant.helpers.update_coordinator import (
@@ -250,11 +251,9 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
         self._kwh_per_100km = kwh_per_100km
         self._charging_paused = False
 
-    async def async_added_to_hass(self):
-        await super().async_added_to_hass()
-        async_track_time_interval(self.hass, self.check_and_pause_charging, timedelta(seconds=10))
-
-    async def handle_paused_state_change(self, entity_id, old_state, new_state):
+    async def handle_paused_state_change(self, event: Event[EventStateChangedData]):
+        old_state = event.data["old_state"]
+        new_state = event.data["new_state"]
         if new_state is not None and old_state is not None:
             if new_state.state == "on" and old_state.state == "off":
                 #_LOGGER.debug("Charging paused")
@@ -282,7 +281,7 @@ class ChargeKmSensor(CoordinatorEntity, SensorEntity):
     async def async_added_to_hass(self):
         await super().async_added_to_hass()
         async_track_time_interval(self.hass, self.check_and_pause_charging, timedelta(seconds=10))
-        async_track_state_change(self.hass, ["switch.v2c_trydan_switch_paused"], self.handle_paused_state_change)
+        async_track_state_change_event(self.hass, ["switch.v2c_trydan_switch_paused"], self.handle_paused_state_change)
         self.hass.bus.async_listen("state_changed", self.handle_km_to_charge_state_change)
 
 
@@ -452,7 +451,7 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
             return valid_hours, valid_hours_next_day, total_hours
     
         async def pause_or_resume_charging(current_state, max_price, paused_switch, v2c_carga_pvpc_switch):
-            if v2c_carga_pvpc_switch.is_on:
+            if v2c_carga_pvpc_switch.is_on and current_state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
                 if float(current_state) <= max_price:
                     await paused_switch.async_turn_off()
                 else:
