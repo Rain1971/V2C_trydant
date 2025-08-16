@@ -1,6 +1,6 @@
 {
   "domain": "v2c_trydan",
-  "name": "v2c_trydan",
+  "name": "V2C Trydan",
   "codeowners": ["@Rain1971"],
   "config_flow": true,
   "dependencies": [],
@@ -9,8 +9,10 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Rain1971/V2C_trydant/issues",
   "quality_scale": "internal",
-  "requirements": ["aiohttp", "tenacity"],
+  "requirements": ["aiohttp>=3.8.0", "tenacity>=8.0.0"],
   "ssdp": [],
-  "version": "2.9.12",
-  "zeroconf": []
+  "version": "3.1.0",
+  "zeroconf": [],
+  "after_dependencies": [],
+  "integration_type": "device"
 }

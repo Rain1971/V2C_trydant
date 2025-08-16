@@ -33,11 +33,11 @@ If you want to use the price-based load control feature, you must install the fo
 <img src="./images/install4.png" width="350">
 
 * Add integration and put there your device IP
-* Go to the v2C integration. Now, there are 28 entities. Press on settings and set:
+* Go to the v2C integration. Now, there are 29 entities. Press on settings and set:
    - kWh x 100Km of your car (default: 20.8 kWh/100km)
    - Sensor.pvpc  ->( add this only if you want to control your car charge based on the price of electricity. See PVPC Hourly Pricing Card )
    <img src="./images/install5.png" width="350">
-* Press 'Send' and it create a new entity: sensor.v2c_precio_luz. Now there are 29 entities.
+* Press 'Send' and it create a new entity: sensor.v2c_precio_luz. Now there are 30 entities.
 * Restart Home Assistant
 # Entities:
 
@@ -54,6 +54,7 @@ The following entities are created:
 | v2c_trydan_sensor_contractedpower  | Sensor | R   | N W        | House Contracted Power in Watts. Default `-1`
 | vc2_trydan_sensor_dynamic          | Sensor | R   | N `values`    | Dynamic Intensity Modulation state: `0`-Disabled, `1`-Enabled
 | vc2_trydan_sensor_dynamicpowermode | Sensor | R   | N `values`    | Dynamic Mode: 0 Timed Power enabled; `1`-Timed Power Disabled, `2`-Timed Power Disabled and Exclusive Mode setted, `3`-Timed Power Disabled and Min Power Mode setted, `4`-Timed Power Disabled and Grid+FV mode setted, `5`-Timed Power Disabled and Stop Mode setted
+| v2c_dynamic_power_mode             | Select | R/W | `options`     | Dynamic Power Mode selector with options: "Enable Timed Power", "Disable Timed Power", "Disable Timed Power and set Exclusive Mode", "Disable Timed Power and set Min Power Mode", "Disable Timed Power and set Grid+FV mode", "Disable Timed Power and set Stop Mode"
 | vc2_trydan_sensor_fvpower          | Sensor | R   | N W        | Photovoltaic power generation in Watts.
 | vc2_trydan_sensor_housepower       | Sensor | R   | N W        | House power consumption in Watts.
 | v2c_trydan_sensor_intensity \   v2c_intensity      | Sensor Number | R \ W | N A        | Intensity offered by Charge Point in Amps, **if Dynamic Charge is disabled**. 

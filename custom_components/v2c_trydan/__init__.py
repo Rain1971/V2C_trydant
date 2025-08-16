@@ -1,16 +1,17 @@
 """The v2c_trydan component."""
-from homeassistant.config_entries import SOURCE_IMPORT
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.const import CONF_IP_ADDRESS
+from homeassistant.const import CONF_IP_ADDRESS, Platform
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 import aiohttp
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "v2c_trydan"
 
-PLATFORMS = ["sensor", "switch", "number"]
+PLATFORMS = [Platform.SENSOR, Platform.SWITCH, Platform.NUMBER, Platform.SELECT]
 
 async def async_setup(hass: HomeAssistant, config: dict):
     hass.data.setdefault(DOMAIN, {})
@@ -27,11 +28,28 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
     return True
 
-async def async_setup_entry(hass: HomeAssistant, entry):
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    hass.data[DOMAIN]["ip_address"] = entry.data[CONF_IP_ADDRESS]
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up V2C Trydan from a config entry."""
+    hass.data.setdefault(DOMAIN, {})
+    
     ip_address = entry.data[CONF_IP_ADDRESS]
+    hass.data[DOMAIN][entry.entry_id] = {
+        "ip_address": ip_address,
+        "entry": entry
+    }
+    
+    # Register device
+    device_registry = dr.async_get(hass)
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, ip_address)},
+        manufacturer="V2C",
+        model="Trydan",
+        name=f"V2C Trydan ({ip_address})",
+        configuration_url=f"http://{ip_address}",
+    )
+    
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def set_min_intensity(call: ServiceCall):
         #_LOGGER.debug("min_intensity service called")
@@ -152,49 +170,55 @@ async def async_setup_entry(hass: HomeAssistant, entry):
 
     return True
 
-async def async_unload_entry(hass: HomeAssistant, entry):
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+        
+    return unload_ok
 
 async def async_set_min_intensity(hass: HomeAssistant, ip_address: str, min_intensity: int):
-    #_LOGGER.debug(f"Setting min intensity to {min_intensity} at IP {ip_address}")
-    async with aiohttp.ClientSession() as session:
-        url = f"http://{ip_address}/write/MinIntensity={min_intensity}"
-        try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                #_LOGGER.debug(f"Min intensity set successfully to {min_intensity} at IP {ip_address}")
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Error communicating with API: {err}")
+    """Set minimum charging intensity."""
+    session = async_get_clientsession(hass)
+    url = f"http://{ip_address}/write/MinIntensity={min_intensity}"
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            response.raise_for_status()
+            _LOGGER.debug(f"Min intensity set to {min_intensity} at {ip_address}")
+    except aiohttp.ClientError as err:
+        _LOGGER.error(f"Error setting min intensity: {err}")
 
-async def async_set_max_intensity(hass, ip_address: str, max_intensity):
-    #_LOGGER.debug(f"Setting max intensity to {max_intensity} at IP {ip_address}")
-    async with aiohttp.ClientSession() as session:
-        url = f"http://{ip_address}/write/MaxIntensity={max_intensity}"
-        try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                #_LOGGER.debug(f"Max intensity set successfully to {max_intensity} at IP {ip_address}")
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Error communicating with API: {err}")
+async def async_set_max_intensity(hass: HomeAssistant, ip_address: str, max_intensity: int):
+    """Set maximum charging intensity."""
+    session = async_get_clientsession(hass)
+    url = f"http://{ip_address}/write/MaxIntensity={max_intensity}"
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            response.raise_for_status()
+            _LOGGER.debug(f"Max intensity set to {max_intensity} at {ip_address}")
+    except aiohttp.ClientError as err:
+        _LOGGER.error(f"Error setting max intensity: {err}")
 
 async def async_set_dynamic_power_mode(hass: HomeAssistant, ip_address: str, dynamic_power_mode: int):
-    #_LOGGER.debug(f"Setting dynamic power mode to {dynamic_power_mode} at IP {ip_address}")
-    async with aiohttp.ClientSession() as session:
-        url = f"http://{ip_address}/write/DynamicPowerMode={dynamic_power_mode}"
-        try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                #_LOGGER.debug(f"Dynamic power mode set successfully to {dynamic_power_mode} at IP {ip_address}")
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Error communicating with API: {err}")
+    """Set dynamic power mode."""
+    session = async_get_clientsession(hass)
+    url = f"http://{ip_address}/write/DynamicPowerMode={dynamic_power_mode}"
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            response.raise_for_status()
+            _LOGGER.debug(f"Dynamic power mode set to {dynamic_power_mode} at {ip_address}")
+    except aiohttp.ClientError as err:
+        _LOGGER.error(f"Error setting dynamic power mode: {err}")
 
-async def async_set_intensity(hass, ip_address: str, intensity):
-    #_LOGGER.debug(f"Setting intensity to {intensity} at IP {ip_address}")
-    async with aiohttp.ClientSession() as session:
-        url = f"http://{ip_address}/write/Intensity={intensity}"
-        try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                #_LOGGER.debug(f"Intensity set successfully to {intensity} at IP {ip_address}")
-        except aiohttp.ClientError as err:
-            _LOGGER.error(f"Error communicating with API: {err}")
+async def async_set_intensity(hass: HomeAssistant, ip_address: str, intensity: int):
+    """Set charging intensity."""
+    session = async_get_clientsession(hass)
+    url = f"http://{ip_address}/write/Intensity={intensity}"
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            response.raise_for_status()
+            _LOGGER.debug(f"Intensity set to {intensity} at {ip_address}")
+    except aiohttp.ClientError as err:
+        _LOGGER.error(f"Error setting intensity: {err}")

@@ -1,20 +1,13 @@
 import logging
-from datetime import timedelta
-
 import aiohttp
-import async_timeout
 import voluptuous as vol
 
 from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
 from homeassistant.const import CONF_IP_ADDRESS
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .coordinator import V2CtrydanDataUpdateCoordinator
 from .const import DOMAIN, CONF_PRECIO_LUZ
@@ -45,10 +38,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     async_add_entities(switches)
 
 class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
+    """Representation of a V2C Trydan switch."""
+    
     def __init__(self, coordinator, ip_address, data_key):
+        """Initialize the switch."""
         super().__init__(coordinator)
         self._ip_address = ip_address
         self._data_key = data_key
+        self._attr_has_entity_name = True
 
     @property
     def unique_id(self):
@@ -56,31 +53,50 @@ class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
 
     @property
     def name(self):
+        """Return the name of the switch."""
         return f"V2C trydan Switch {self._data_key}"
+        
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for this entity."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._ip_address)},
+            name=f"V2C Trydan ({self._ip_address})",
+            manufacturer="V2C",
+            model="Trydan",
+            configuration_url=f"http://{self._ip_address}",
+        )
 
     @property
     def is_on(self):
-        return bool(self.coordinator.data[self._data_key])
+        """Return true if switch is on."""
+        if self.coordinator.data is None:
+            return False
+        return bool(self.coordinator.data.get(self._data_key, False))
 
     async def async_turn_on(self, **kwargs):
+        """Turn the switch on."""
+        session = async_get_clientsession(self.hass)
+        url = f"http://{self._ip_address}/write/{self._data_key}=1"
         try:
-            async with aiohttp.ClientSession() as session:
-                url = f"http://{self._ip_address}/write/{self._data_key}=1"
-                async with session.get(url) as response:
-                    response.raise_for_status()
-                    await self.coordinator.async_request_refresh()
-        except Exception as e:
-            _LOGGER.error(f"Error turning on switch: {e}")
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                response.raise_for_status()
+                await self.coordinator.async_request_refresh()
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Error turning on switch {self._data_key}: {e}")
+            raise
 
     async def async_turn_off(self, **kwargs):
+        """Turn the switch off."""
+        session = async_get_clientsession(self.hass)
+        url = f"http://{self._ip_address}/write/{self._data_key}=0"
         try:
-            async with aiohttp.ClientSession() as session:
-                url = f"http://{self._ip_address}/write/{self._data_key}=0"
-                async with session.get(url) as response:
-                    response.raise_for_status()
-                    await self.coordinator.async_request_refresh()
-        except Exception as e:
-            _LOGGER.error(f"Error turning off switch: {e}")
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                response.raise_for_status()
+                await self.coordinator.async_request_refresh()
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Error turning off switch {self._data_key}: {e}")
+            raise
 
 class V2CCargaPVPCSwitch(SwitchEntity):
     def __init__(self, precio_luz_entity):
