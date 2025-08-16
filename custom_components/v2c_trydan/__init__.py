@@ -2,7 +2,7 @@
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.const import CONF_IP_ADDRESS, Platform
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as dr, config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 import aiohttp
@@ -12,6 +12,9 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = "v2c_trydan"
 
 PLATFORMS = [Platform.SENSOR, Platform.SWITCH, Platform.NUMBER, Platform.SELECT]
+
+# Configuration schema - this integration is config entry only
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 async def async_setup(hass: HomeAssistant, config: dict):
     hass.data.setdefault(DOMAIN, {})
