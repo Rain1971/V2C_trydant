@@ -10,14 +10,14 @@ from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# Dynamic Power Mode options
+# Dynamic Power Mode options with translation keys
 DYNAMIC_POWER_MODE_OPTIONS = [
-    "Enable Timed Power",                          # 0
-    "Disable Timed Power",                         # 1
-    "Disable Timed Power and set Exclusive Mode", # 2
-    "Disable Timed Power and set Min Power Mode", # 3
-    "Disable Timed Power and set Grid+FV mode",   # 4
-    "Disable Timed Power and set Stop Mode",      # 5
+    "enable_timed_power",                    # 0
+    "disable_timed_power",                   # 1
+    "disable_timed_power_exclusive",         # 2
+    "disable_timed_power_min",               # 3
+    "disable_timed_power_grid_fv",           # 4
+    "disable_timed_power_stop",              # 5
 ]
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -35,15 +35,12 @@ class DynamicPowerModeSelect(SelectEntity):
         self._current_option = None
         self._attr_has_entity_name = True
         self._attr_options = DYNAMIC_POWER_MODE_OPTIONS
+        self._attr_translation_key = "dynamic_power_mode"
 
     @property
     def unique_id(self):
         return "v2c_dynamic_power_mode_select"
 
-    @property
-    def name(self):
-        """Return the name of the entity."""
-        return "v2c_dynamic_power_mode"
         
     @property
     def device_info(self) -> DeviceInfo:

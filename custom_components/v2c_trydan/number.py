@@ -30,15 +30,12 @@ class MaxIntensityNumber(NumberEntity):
         self._state = 32
         self._ip_address = ip_address
         self._attr_has_entity_name = True
+        self._attr_translation_key = "max_intensity"
 
     @property
     def unique_id(self):
         return "v2c_max_intensity"
 
-    @property
-    def name(self):
-        """Return the name of the entity."""
-        return "v2c_max_intensity"
         
     @property
     def device_info(self) -> DeviceInfo:
@@ -118,15 +115,12 @@ class MinIntensityNumber(NumberEntity):
         self._state = 6
         self._ip_address = ip_address
         self._attr_has_entity_name = True
+        self._attr_translation_key = "min_intensity"
 
     @property
     def unique_id(self):
         return "v2c_min_intensity"
 
-    @property
-    def name(self):
-        """Return the name of the entity."""
-        return "v2c_min_intensity"
         
     @property
     def device_info(self) -> DeviceInfo:
@@ -206,15 +200,12 @@ class KmToChargeNumber(NumberEntity):
         self._hass = hass
         self._state = 0
         self._attr_has_entity_name = True
+        self._attr_translation_key = "km_to_charge"
 
     @property
     def unique_id(self):
         return "v2c_km_to_charge"
 
-    @property
-    def name(self):
-        """Return the name of the entity."""
-        return "v2c_km_to_charge"
 
     @property
     def icon(self):
@@ -252,15 +243,12 @@ class IntensityNumber(NumberEntity):
         self._state = 6
         self._ip_address = ip_address
         self._attr_has_entity_name = True
+        self._attr_translation_key = "intensity"
 
     @property
     def unique_id(self):
         return "v2c_intensity"
 
-    @property
-    def name(self):
-        """Return the name of the entity."""
-        return "v2c_intensity"
         
     @property
     def device_info(self) -> DeviceInfo:
@@ -327,15 +315,12 @@ class MaxPrice(NumberEntity):
         self._hass = hass
         self._state = 0
         self._attr_has_entity_name = True
+        self._attr_translation_key = "max_price"
 
     @property
     def unique_id(self):
         return "v2c_MaxPrice"
 
-    @property
-    def name(self):
-        """Return the name of the entity."""
-        return "v2c_MaxPrice"
 
     @property
     def icon(self):

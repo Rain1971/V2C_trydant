@@ -64,6 +64,28 @@ DEVICE_CLASS_MAP = {
     "FirmwareVersion": None,                  # Dynamic version - diagnostic
 }
 
+# Translation keys for sensor entities
+TRANSLATION_KEY_MAP = {
+    "ChargeEnergy": "chargeenergy",
+    "ChargePower": "chargepower", 
+    "ChargeState": "chargestate",
+    "ChargeTime": "chargetime",
+    "ContractedPower": "contractedpower",
+    "Dynamic": "dynamic",
+    "DynamicPowerMode": "dynamicpowermode",
+    "FVPower": "fvpower",
+    "HousePower": "housepower",
+    "Intensity": "intensity",
+    "Locked": "locked",
+    "MaxIntensity": "maxintensity",
+    "MinIntensity": "minintensity",
+    "Paused": "paused",
+    "PauseDynamic": "pausedynamic",
+    "SlaveError": "slaveerror",
+    "Timer": "timer",
+    "FirmwareVersion": "firmware_version",
+}
+
 STATE_CLASS_MAP = {
     "ChargeEnergy": "total_increasing",
     "ChargePower": "measurement",
@@ -165,6 +187,8 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
         self.carga_previo = 0
         self._last_reset = None
         self._attr_has_entity_name = True
+        # Set translation key if available
+        self._attr_translation_key = TRANSLATION_KEY_MAP.get(data_key)
 
     @property
     def last_reset(self):
@@ -178,10 +202,6 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
     def unique_id(self):
         return f"{self._ip_address}_{self._data_key}"
 
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return f"V2C trydan Sensor {self._data_key}"
         
     @property
     def device_info(self) -> DeviceInfo:

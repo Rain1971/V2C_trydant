@@ -11,7 +11,7 @@
   "quality_scale": "internal",
   "requirements": ["aiohttp>=3.8.0", "tenacity>=8.0.0"],
   "ssdp": [],
-  "version": "3.1.0",
+  "version": "3.2.0",
   "zeroconf": [],
   "after_dependencies": [],
   "integration_type": "device"

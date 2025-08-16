@@ -1,0 +1,143 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "V2C Trydan Configuration",
+        "description": "Configure your V2C Trydan charger",
+        "data": {
+          "ip_address": "IP Address"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to device",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "V2C Trydan Options",
+        "description": "Configure additional settings",
+        "data": {
+          "kwh_per_100km": "kWh per 100km",
+          "precio_luz": "Price sensor (PVPC)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "chargeenergy": {
+        "name": "Charge Energy"
+      },
+      "chargepower": {
+        "name": "Charge Power"
+      },
+      "chargestate": {
+        "name": "Charge State"
+      },
+      "chargetime": {
+        "name": "Charge Time"
+      },
+      "contractedpower": {
+        "name": "Contracted Power"
+      },
+      "dynamic": {
+        "name": "Dynamic Charge"
+      },
+      "dynamicpowermode": {
+        "name": "Dynamic Power Mode"
+      },
+      "fvpower": {
+        "name": "Photovoltaic Power"
+      },
+      "housepower": {
+        "name": "House Power"
+      },
+      "intensity": {
+        "name": "Charge Intensity"
+      },
+      "locked": {
+        "name": "Charger Locked"
+      },
+      "maxintensity": {
+        "name": "Maximum Intensity"
+      },
+      "minintensity": {
+        "name": "Minimum Intensity"
+      },
+      "paused": {
+        "name": "Charge Paused"
+      },
+      "pausedynamic": {
+        "name": "Dynamic Pause"
+      },
+      "slaveerror": {
+        "name": "Slave Error"
+      },
+      "timer": {
+        "name": "Timer"
+      },
+      "numericalstatus": {
+        "name": "Numerical Status"
+      },
+      "firmware_version": {
+        "name": "Firmware Version"
+      },
+      "precio_luz": {
+        "name": "Electricity Price"
+      }
+    },
+    "switch": {
+      "dynamic": {
+        "name": "Dynamic Charge"
+      },
+      "paused": {
+        "name": "Pause Charge"
+      },
+      "locked": {
+        "name": "Lock Charger"
+      },
+      "carga_pvpc": {
+        "name": "PVPC Price Control"
+      },
+      "smart_charge": {
+        "name": "Smart Charge"
+      }
+    },
+    "number": {
+      "max_intensity": {
+        "name": "Maximum Intensity"
+      },
+      "min_intensity": {
+        "name": "Minimum Intensity"
+      },
+      "intensity": {
+        "name": "Charge Intensity"
+      },
+      "km_to_charge": {
+        "name": "Kilometers to Charge"
+      },
+      "max_price": {
+        "name": "Maximum Price"
+      }
+    },
+    "select": {
+      "dynamic_power_mode": {
+        "name": "Dynamic Power Mode",
+        "state": {
+          "enable_timed_power": "Enable Timed Power",
+          "disable_timed_power": "Disable Timed Power",
+          "disable_timed_power_exclusive": "Disable Timed Power and set Exclusive Mode",
+          "disable_timed_power_min": "Disable Timed Power and set Min Power Mode",
+          "disable_timed_power_grid_fv": "Disable Timed Power and set Grid+FV mode",
+          "disable_timed_power_stop": "Disable Timed Power and set Stop Mode"
+        }
+      }
+    }
+  }
+}

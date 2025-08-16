@@ -14,6 +14,13 @@ from .const import DOMAIN, CONF_PRECIO_LUZ
 
 _LOGGER = logging.getLogger(__name__)
 
+# Translation keys for switch entities
+SWITCH_TRANSLATION_KEY_MAP = {
+    "Dynamic": "dynamic",
+    "Paused": "paused", 
+    "Locked": "locked",
+}
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_IP_ADDRESS): str,
@@ -46,15 +53,13 @@ class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
         self._ip_address = ip_address
         self._data_key = data_key
         self._attr_has_entity_name = True
+        # Set translation key if available
+        self._attr_translation_key = SWITCH_TRANSLATION_KEY_MAP.get(data_key)
 
     @property
     def unique_id(self):
         return f"{self._ip_address}_{self._data_key}"
 
-    @property
-    def name(self):
-        """Return the name of the switch."""
-        return f"V2C trydan Switch {self._data_key}"
         
     @property
     def device_info(self) -> DeviceInfo:
