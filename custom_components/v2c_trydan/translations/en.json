@@ -88,6 +88,9 @@
       "firmware_version": {
         "name": "Firmware Version"
       },
+      "readystate": {
+        "name": "Ready State"
+      },
       "precio_luz": {
         "name": "Electricity Price"
       }

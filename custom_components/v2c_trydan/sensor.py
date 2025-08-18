@@ -58,10 +58,19 @@ DEVICE_CLASS_MAP = {
     "Intensity": SensorDeviceClass.CURRENT,
     "MinIntensity": SensorDeviceClass.CURRENT,
     "MaxIntensity": SensorDeviceClass.CURRENT,
+    "ContractedPower": SensorDeviceClass.POWER,
     # Text sensors configuration
     "ChargeState": SensorDeviceClass.ENUM,    # Fixed states
     "ChargeTime": None,                       # Dynamic time format
     "FirmwareVersion": None,                  # Dynamic version - diagnostic
+    "ReadyState": None,                       # Numeric state
+    "Timer": None,                            # Timer value
+    "Dynamic": None,                          # Boolean/numeric state
+    "DynamicPowerMode": None,                 # Mode indicator
+    "Locked": None,                           # Boolean state
+    "Paused": None,                           # Boolean state
+    "PauseDynamic": None,                     # Boolean state
+    "SlaveError": None,                       # Error indicator
 }
 
 # Translation keys for sensor entities
@@ -84,6 +93,7 @@ TRANSLATION_KEY_MAP = {
     "SlaveError": "slaveerror",
     "Timer": "timer",
     "FirmwareVersion": "firmware_version",
+    "ReadyState": "readystate",
 }
 
 STATE_CLASS_MAP = {
@@ -93,7 +103,16 @@ STATE_CLASS_MAP = {
     "FVPower": "measurement",
     "Intensity": "measurement",
     "MinIntensity": "measurement",
-    "MaxIntensity": "measurement"
+    "MaxIntensity": "measurement",
+    "ReadyState": "measurement",
+    "ContractedPower": "measurement",
+    "Timer": "measurement",
+    "Dynamic": "measurement",
+    "DynamicPowerMode": "measurement",
+    "Locked": "measurement",
+    "Paused": "measurement",
+    "PauseDynamic": "measurement",
+    "SlaveError": "measurement"
 }
 
 NATIVE_UNIT_MAP = {
@@ -104,9 +123,18 @@ NATIVE_UNIT_MAP = {
     "Intensity": "A",
     "MinIntensity": "A",
     "MaxIntensity": "A",
-    # Text sensors must have None for units
+    "ContractedPower": "W",
+    # Text sensors and state sensors must have None for units
     "ChargeTime": None,
-    "FirmwareVersion": None
+    "FirmwareVersion": None,
+    "ReadyState": None,
+    "Timer": None,
+    "Dynamic": None,
+    "DynamicPowerMode": None,
+    "Locked": None,
+    "Paused": None,
+    "PauseDynamic": None,
+    "SlaveError": None
 }
 
 # Options for ENUM sensors

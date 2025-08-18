@@ -1,4 +1,5 @@
 from homeassistant.components.number import NumberEntity
+from homeassistant.components.sensor import SensorStateClass
 from homeassistant.const import DEVICE_DEFAULT_NAME, CONF_IP_ADDRESS
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -67,6 +68,10 @@ class MaxIntensityNumber(NumberEntity):
     @property
     def native_min_value(self):
         return 6
+
+    @property
+    def state_class(self):
+        return SensorStateClass.MEASUREMENT
 
     async def async_set_native_value(self, value):
         # Convert to integer for the device
@@ -153,6 +158,10 @@ class MinIntensityNumber(NumberEntity):
     def native_min_value(self):
         return 6
 
+    @property
+    def state_class(self):
+        return SensorStateClass.MEASUREMENT
+
     async def async_set_native_value(self, value):
         # Convert to integer for the device
         int_value = int(value)
@@ -227,6 +236,10 @@ class KmToChargeNumber(NumberEntity):
     def native_min_value(self):
         return 0
 
+    @property
+    def state_class(self):
+        return SensorStateClass.MEASUREMENT
+
     async def async_set_native_value(self, value):
         if 0 <= value <= 1000:
             self._state = value
@@ -280,6 +293,10 @@ class IntensityNumber(NumberEntity):
     @property
     def native_min_value(self):
         return 6
+
+    @property
+    def state_class(self):
+        return SensorStateClass.MEASUREMENT
 
     async def async_set_native_value(self, value):
         # Convert to integer for the device
@@ -341,6 +358,10 @@ class MaxPrice(NumberEntity):
     @property
     def native_min_value(self):
         return 0.000
+
+    @property
+    def state_class(self):
+        return SensorStateClass.MEASUREMENT
 
     async def async_set_native_value(self, value):
         if 0 <= value <= 1.0:

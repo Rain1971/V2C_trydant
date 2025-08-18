@@ -85,6 +85,12 @@
       "numericalstatus": {
         "name": "État Numérique"
       },
+      "firmware_version": {
+        "name": "Version du Firmware"
+      },
+      "readystate": {
+        "name": "État Prêt"
+      },
       "precio_luz": {
         "name": "Prix de l'Électricité"
       }

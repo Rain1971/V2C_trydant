@@ -88,6 +88,9 @@
       "firmware_version": {
         "name": "Versión de Firmware"
       },
+      "readystate": {
+        "name": "Estado Listo"
+      },
       "precio_luz": {
         "name": "Precio de la Electricidad"
       }
