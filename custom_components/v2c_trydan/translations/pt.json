@@ -1,0 +1,146 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuração V2C Trydan",
+        "description": "Configure o seu carregador V2C Trydan",
+        "data": {
+          "ip_address": "Endereço IP"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Falha ao conectar ao dispositivo",
+      "unknown": "Ocorreu um erro inesperado"
+    },
+    "abort": {
+      "already_configured": "O dispositivo já está configurado"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opções V2C Trydan",
+        "description": "Configure definições adicionais",
+        "data": {
+          "kwh_per_100km": "kWh por 100km",
+          "precio_luz": "Sensor de preço (PVPC)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "chargeenergy": {
+        "name": "Energia de Carregamento"
+      },
+      "chargepower": {
+        "name": "Potência de Carregamento"
+      },
+      "chargestate": {
+        "name": "Estado do Carregamento"
+      },
+      "chargetime": {
+        "name": "Tempo de Carregamento"
+      },
+      "contractedpower": {
+        "name": "Potência Contratada"
+      },
+      "dynamic": {
+        "name": "Carregamento Dinâmico"
+      },
+      "dynamicpowermode": {
+        "name": "Modo de Potência Dinâmica"
+      },
+      "fvpower": {
+        "name": "Potência Fotovoltaica"
+      },
+      "housepower": {
+        "name": "Potência da Casa"
+      },
+      "intensity": {
+        "name": "Intensidade de Carregamento"
+      },
+      "locked": {
+        "name": "Carregador Bloqueado"
+      },
+      "maxintensity": {
+        "name": "Intensidade Máxima"
+      },
+      "minintensity": {
+        "name": "Intensidade Mínima"
+      },
+      "paused": {
+        "name": "Carregamento Pausado"
+      },
+      "pausedynamic": {
+        "name": "Pausa Dinâmica"
+      },
+      "slaveerror": {
+        "name": "Erro do Escravo"
+      },
+      "timer": {
+        "name": "Temporizador"
+      },
+      "numericalstatus": {
+        "name": "Estado Numérico"
+      },
+      "firmware_version": {
+        "name": "Versão do Firmware"
+      },
+      "readystate": {
+        "name": "Estado Pronto"
+      },
+      "precio_luz": {
+        "name": "Preço da Eletricidade"
+      }
+    },
+    "switch": {
+      "dynamic": {
+        "name": "Carregamento Dinâmico"
+      },
+      "paused": {
+        "name": "Pausar Carregamento"
+      },
+      "locked": {
+        "name": "Bloquear Carregador"
+      },
+      "carga_pvpc": {
+        "name": "Controle de Preço PVPC"
+      },
+      "smart_charge": {
+        "name": "Carregamento Inteligente"
+      }
+    },
+    "number": {
+      "max_intensity": {
+        "name": "Intensidade Máxima"
+      },
+      "min_intensity": {
+        "name": "Intensidade Mínima"
+      },
+      "intensity": {
+        "name": "Intensidade de Carregamento"
+      },
+      "km_to_charge": {
+        "name": "Quilômetros para Carregar"
+      },
+      "max_price": {
+        "name": "Preço Máximo"
+      }
+    },
+    "select": {
+      "dynamic_power_mode": {
+        "name": "Modo de Potência Dinâmica",
+        "state": {
+          "enable_timed_power": "Ativar Potência Temporizada",
+          "disable_timed_power": "Desativar Potência Temporizada",
+          "disable_timed_power_exclusive": "Desativar Potência Temporizada e definir Modo Exclusivo",
+          "disable_timed_power_min": "Desativar Potência Temporizada e definir Modo Potência Mínima",
+          "disable_timed_power_grid_fv": "Desativar Potência Temporizada e definir modo Rede+FV",
+          "disable_timed_power_stop": "Desativar Potência Temporizada e definir Modo Parar"
+        }
+      }
+    }
+  }
+}
