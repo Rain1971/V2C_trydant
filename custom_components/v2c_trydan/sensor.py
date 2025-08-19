@@ -391,11 +391,11 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
         
     @property
     def device_class(self):
-        return DEVICE_CLASS_MAP.get(self._data_key, "")
+        return DEVICE_CLASS_MAP.get(self._data_key)
 
     @property
     def native_unit_of_measurement(self):
-        return NATIVE_UNIT_MAP.get(self._data_key, "")
+        return NATIVE_UNIT_MAP.get(self._data_key)
 
     @property
     def last_reset(self):
