@@ -1,0 +1,146 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "V2C Trydan Konfigurazioa",
+        "description": "Konfiguratu zure V2C Trydan kargagailua",
+        "data": {
+          "ip_address": "IP Helbidea"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Ezin izan da gailura konektatu",
+      "unknown": "Ustekabeko errore bat gertatu da"
+    },
+    "abort": {
+      "already_configured": "Gailua dagoeneko konfiguratuta dago"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "V2C Trydan Aukerak",
+        "description": "Konfiguratu ezarpen gehigarriak",
+        "data": {
+          "kwh_per_100km": "kWh 100km-ko",
+          "precio_luz": "Prezio sentsorea (PVPC)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "chargeenergy": {
+        "name": "Karga Energia"
+      },
+      "chargepower": {
+        "name": "Karga Potentzia"
+      },
+      "chargestate": {
+        "name": "Karga Egoera"
+      },
+      "chargetime": {
+        "name": "Karga Denbora"
+      },
+      "contractedpower": {
+        "name": "Kontratatutako Potentzia"
+      },
+      "dynamic": {
+        "name": "Karga Dinamikoa"
+      },
+      "dynamicpowermode": {
+        "name": "Potentzia Dinamiko Modua"
+      },
+      "fvpower": {
+        "name": "Potentzia Fotovoltaikoa"
+      },
+      "housepower": {
+        "name": "Etxe Potentzia"
+      },
+      "intensity": {
+        "name": "Karga Intentsitatea"
+      },
+      "locked": {
+        "name": "Kargagailu Blokeatua"
+      },
+      "maxintensity": {
+        "name": "Gehienezko Intentsitatea"
+      },
+      "minintensity": {
+        "name": "Gutxieneko Intentsitatea"
+      },
+      "paused": {
+        "name": "Karga Pausatua"
+      },
+      "pausedynamic": {
+        "name": "Pausa Dinamikoa"
+      },
+      "slaveerror": {
+        "name": "Menpeko Errorea"
+      },
+      "timer": {
+        "name": "Denboregilua"
+      },
+      "numericalstatus": {
+        "name": "Egoera Zenbakizkoa"
+      },
+      "firmware_version": {
+        "name": "Firmware Bertsioa"
+      },
+      "readystate": {
+        "name": "Prest Egoera"
+      },
+      "precio_luz": {
+        "name": "Elektrizitate Prezioa"
+      }
+    },
+    "switch": {
+      "dynamic": {
+        "name": "Karga Dinamikoa"
+      },
+      "paused": {
+        "name": "Pausatu Karga"
+      },
+      "locked": {
+        "name": "Blokeatu Kargagailua"
+      },
+      "carga_pvpc": {
+        "name": "PVPC Prezio Kontrola"
+      },
+      "smart_charge": {
+        "name": "Karga Adimentsua"
+      }
+    },
+    "number": {
+      "max_intensity": {
+        "name": "Gehienezko Intentsitatea"
+      },
+      "min_intensity": {
+        "name": "Gutxieneko Intentsitatea"
+      },
+      "intensity": {
+        "name": "Karga Intentsitatea"
+      },
+      "km_to_charge": {
+        "name": "Kargatzeko Kilometroak"
+      },
+      "max_price": {
+        "name": "Gehienezko Prezioa"
+      }
+    },
+    "select": {
+      "dynamic_power_mode": {
+        "name": "Potentzia Dinamiko Modua",
+        "state": {
+          "enable_timed_power": "Denborazko Potentzia Gaitu",
+          "disable_timed_power": "Denborazko Potentzia Desgaitu",
+          "disable_timed_power_exclusive": "Denborazko Potentzia Desgaitu eta Modu Esklusibora Ezarri",
+          "disable_timed_power_min": "Denborazko Potentzia Desgaitu eta Gutxieneko Potentzia Modura Ezarri",
+          "disable_timed_power_grid_fv": "Denborazko Potentzia Desgaitu eta Sare+FV modura ezarri",
+          "disable_timed_power_stop": "Denborazko Potentzia Desgaitu eta Gelditzeko Modura Ezarri"
+        }
+      }
+    }
+  }
+}
