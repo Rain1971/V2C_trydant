@@ -14,8 +14,25 @@ from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
 _LOGGER = logging.getLogger(__name__)
 
 def arreglar_json_invalido(json_str: str) -> dict:
+    """Fix malformed JSON responses from V2C Trydan devices.
+    
+    Handles common issues:
+    - Duplicated FirmwareVersion fields
+    - Missing quotes on version numbers
+    - Malformed structure
+    """
+    # Remove duplicate FirmwareVersion fields (keep the last one)
+    firmware_pattern = r'"FirmwareVersion":"[^"]*",'
+    matches = list(re.finditer(firmware_pattern, json_str))
+    if len(matches) > 1:
+        # Remove all but the last occurrence
+        for match in matches[:-1]:
+            json_str = json_str[:match.start()] + json_str[match.end():]
+    
+    # Fix version numbers without quotes
     cadena = json_str.replace("1.6.13", "\"1.6.13\"")
     json_str_arreglado = cadena.replace("\"ReadyState\":", ",\"ReadyState\":")
+    
     try:
         return json.loads(json_str_arreglado)
     except json.JSONDecodeError as e:
@@ -74,15 +91,27 @@ class V2CtrydanDataUpdateCoordinator(DataUpdateCoordinator):
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
     async def _async_get_json(self, session, url):
-        """Get JSON data from API with retry logic."""
+        """Get JSON data from API with retry logic.
+        
+        Handles firmware issues:
+        - Incorrect Content-Type (text instead of application/json)
+        - Malformed JSON with duplicate fields
+        """
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
                 if response.status == 200:
                     text = await response.text()
+                    content_type = response.headers.get('content-type', '').lower()
+                    
+                    # Log content-type issues for debugging
+                    if 'application/json' not in content_type:
+                        _LOGGER.debug(f"Device returned non-JSON content-type: {content_type}, parsing as JSON anyway")
+                    
                     try:
                         return json.loads(text)
                     except json.JSONDecodeError:
                         # Try to fix malformed JSON
+                        _LOGGER.debug(f"JSON parsing failed, attempting to fix malformed response")
                         return arreglar_json_invalido(text)
                 else:
                     response.raise_for_status()

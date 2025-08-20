@@ -5,10 +5,43 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 import aiohttp
 import asyncio
+import json
+import re
 
 from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
+def _parse_response_json(text: str, content_type: str = '') -> dict:
+    """Parse JSON response, handling V2C firmware issues.
+    
+    Handles:
+    - Incorrect Content-Type (text instead of application/json)
+    - Duplicate FirmwareVersion fields
+    """
+    # Log content-type issues for debugging
+    if content_type and 'application/json' not in content_type.lower():
+        _LOGGER.debug(f"Device returned non-JSON content-type: {content_type}, parsing as JSON anyway")
+    
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        _LOGGER.debug("JSON parsing failed, attempting to fix malformed response")
+        
+        # Remove duplicate FirmwareVersion fields (keep the last one)
+        firmware_pattern = r'"FirmwareVersion":"[^"]*",'
+        matches = list(re.finditer(firmware_pattern, text))
+        if len(matches) > 1:
+            # Remove all but the last occurrence
+            for match in matches[:-1]:
+                text = text[:match.start()] + text[match.end():]
+        
+        # Try to parse again
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as e:
+            _LOGGER.error(f"Failed to parse malformed JSON: {e}")
+            raise
 
 # Dynamic Power Mode options with translation keys
 DYNAMIC_POWER_MODE_OPTIONS = [
@@ -113,7 +146,11 @@ class DynamicPowerModeSelect(SelectEntity):
             timeout = aiohttp.ClientTimeout(total=5, connect=2)
             async with session.get(url, timeout=timeout) as response:
                 response.raise_for_status()
-                data = await response.json()
+                
+                # Handle firmware response issues
+                text = await response.text()
+                content_type = response.headers.get('content-type', '')
+                data = _parse_response_json(text, content_type)
                 
                 # Get the DynamicPowerMode value from the response
                 dynamic_power_mode = data.get("DynamicPowerMode")
