@@ -4,6 +4,7 @@ from homeassistant.const import DEVICE_DEFAULT_NAME, CONF_IP_ADDRESS
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 import logging
 import aiohttp
 import asyncio
@@ -16,20 +17,23 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     ip_address = config_entry.data[CONF_IP_ADDRESS]
     _LOGGER.info(f"Setting up number entities with IP address: {ip_address}")
     
-    async_add_entities([MaxIntensityNumber(hass, ip_address)])
-    async_add_entities([MinIntensityNumber(hass, ip_address)])
+    # Get the coordinator from hass data
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    
+    async_add_entities([MaxIntensityNumber(coordinator)])
+    async_add_entities([MinIntensityNumber(coordinator)])
     async_add_entities([KmToChargeNumber(hass)])
-    async_add_entities([IntensityNumber(hass, ip_address)])
+    async_add_entities([IntensityNumber(coordinator)])
     async_add_entities([MaxPrice(hass)])
 
-class MaxIntensityNumber(NumberEntity):
+class MaxIntensityNumber(CoordinatorEntity, NumberEntity):
     """Representation of max intensity number entity."""
     
-    def __init__(self, hass, ip_address):
+    def __init__(self, coordinator):
         """Initialize the number entity."""
-        self._hass = hass
-        self._state = 32
-        self._ip_address = ip_address
+        super().__init__(coordinator)
+        self._coordinator = coordinator
+        self._ip_address = coordinator.ip_address
         self._attr_has_entity_name = True
         self._attr_translation_key = "max_intensity"
 
@@ -59,7 +63,10 @@ class MaxIntensityNumber(NumberEntity):
 
     @property
     def native_value(self):
-        return self._state
+        """Return the current value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('MaxIntensity', 32)
+        return 32
 
     @property
     def native_max_value(self):
@@ -67,6 +74,9 @@ class MaxIntensityNumber(NumberEntity):
 
     @property
     def native_min_value(self):
+        """Return minimum value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('MinIntensity', 6)
         return 6
 
     @property
@@ -76,12 +86,14 @@ class MaxIntensityNumber(NumberEntity):
     async def async_set_native_value(self, value):
         # Convert to integer for the device
         int_value = int(value)
-        if 6 <= int_value <= 32:
+        min_val = self.native_min_value
+        max_val = self.native_max_value
+        if min_val <= int_value <= max_val:
             await self._set_max_intensity(int_value)
-            self._state = int_value
-            self.async_write_ha_state()
+            # Request coordinator update after setting value
+            await self._coordinator.async_request_refresh()
         else:
-            _LOGGER.error("v2c_max_intensity must be between 6 and 32")
+            _LOGGER.error(f"v2c_max_intensity must be between {min_val} and {max_val}")
             
     async def _set_max_intensity(self, max_intensity):
         """Set max intensity on the device."""
@@ -89,7 +101,7 @@ class MaxIntensityNumber(NumberEntity):
             _LOGGER.error("IP address not available for MaxIntensityNumber")
             return
             
-        session = async_get_clientsession(self._hass)
+        session = async_get_clientsession(self.hass)
         url = f"http://{self._ip_address}/write/MaxIntensity={max_intensity}"
         try:
             timeout = aiohttp.ClientTimeout(total=5, connect=2)
@@ -111,14 +123,14 @@ class MaxIntensityNumber(NumberEntity):
             _LOGGER.error(f"Unexpected error setting max intensity: {err}")
             raise
 
-class MinIntensityNumber(NumberEntity):
+class MinIntensityNumber(CoordinatorEntity, NumberEntity):
     """Representation of min intensity number entity."""
     
-    def __init__(self, hass, ip_address):
+    def __init__(self, coordinator):
         """Initialize the number entity."""
-        self._hass = hass
-        self._state = 6
-        self._ip_address = ip_address
+        super().__init__(coordinator)
+        self._coordinator = coordinator
+        self._ip_address = coordinator.ip_address
         self._attr_has_entity_name = True
         self._attr_translation_key = "min_intensity"
 
@@ -148,10 +160,16 @@ class MinIntensityNumber(NumberEntity):
 
     @property
     def native_value(self):
-        return self._state
+        """Return the current value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('MinIntensity', 6)
+        return 6
 
     @property
     def native_max_value(self):
+        """Return maximum value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('MaxIntensity', 32)
         return 32
 
     @property
@@ -165,12 +183,14 @@ class MinIntensityNumber(NumberEntity):
     async def async_set_native_value(self, value):
         # Convert to integer for the device
         int_value = int(value)
-        if 6 <= int_value <= 32:
+        min_val = self.native_min_value
+        max_val = self.native_max_value
+        if min_val <= int_value <= max_val:
             await self._set_min_intensity(int_value)
-            self._state = int_value
-            self.async_write_ha_state()
+            # Request coordinator update after setting value
+            await self._coordinator.async_request_refresh()
         else:
-            _LOGGER.error("v2c_min_intensity must be between 6 and 32")
+            _LOGGER.error(f"v2c_min_intensity must be between {min_val} and {max_val}")
             
     async def _set_min_intensity(self, min_intensity):
         """Set min intensity on the device."""
@@ -178,7 +198,7 @@ class MinIntensityNumber(NumberEntity):
             _LOGGER.error("IP address not available for MinIntensityNumber")
             return
             
-        session = async_get_clientsession(self._hass)
+        session = async_get_clientsession(self.hass)
         url = f"http://{self._ip_address}/write/MinIntensity={min_intensity}"
         try:
             timeout = aiohttp.ClientTimeout(total=5, connect=2)
@@ -247,14 +267,14 @@ class KmToChargeNumber(NumberEntity):
         else:
             _LOGGER.error("v2c_km_to_charge must be between 0 and 1000")
 
-class IntensityNumber(NumberEntity):
+class IntensityNumber(CoordinatorEntity, NumberEntity):
     """Representation of intensity number entity."""
     
-    def __init__(self, hass, ip_address):
+    def __init__(self, coordinator):
         """Initialize the number entity."""
-        self._hass = hass
-        self._state = 6
-        self._ip_address = ip_address
+        super().__init__(coordinator)
+        self._coordinator = coordinator
+        self._ip_address = coordinator.ip_address
         self._attr_has_entity_name = True
         self._attr_translation_key = "intensity"
 
@@ -284,14 +304,23 @@ class IntensityNumber(NumberEntity):
 
     @property
     def native_value(self):
-        return self._state
+        """Return the current value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('Intensity', 6)
+        return 6
 
     @property
     def native_max_value(self):
+        """Return maximum value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('MaxIntensity', 32)
         return 32
 
     @property
     def native_min_value(self):
+        """Return minimum value from device data."""
+        if self._coordinator.data:
+            return self._coordinator.data.get('MinIntensity', 6)
         return 6
 
     @property
@@ -303,8 +332,8 @@ class IntensityNumber(NumberEntity):
         int_value = int(value)
         if self.native_min_value <= int_value <= self.native_max_value:
             await self._set_intensity(int_value)
-            self._state = int_value
-            self.async_write_ha_state()
+            # Request coordinator update after setting value
+            await self._coordinator.async_request_refresh()
         else:
             _LOGGER.error("v2c_intensity must be between {} and {}".format(self.native_min_value, self.native_max_value))
             
@@ -314,7 +343,7 @@ class IntensityNumber(NumberEntity):
             _LOGGER.error("IP address not available for IntensityNumber")
             return
             
-        session = async_get_clientsession(self._hass)
+        session = async_get_clientsession(self.hass)
         url = f"http://{self._ip_address}/write/Intensity={intensity}"
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
@@ -338,6 +367,18 @@ class MaxPrice(NumberEntity):
     def unique_id(self):
         return "v2c_MaxPrice"
 
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for this entity."""
+        # Use the same IP as other entities
+        ip_address = "10.48.130.141"  # You might want to get this dynamically
+        return DeviceInfo(
+            identifiers={(DOMAIN, ip_address)},
+            name=f"V2C Trydan ({ip_address})",
+            manufacturer="V2C",
+            model="Trydan",
+            configuration_url=f"http://{ip_address}",
+        )
 
     @property
     def icon(self):

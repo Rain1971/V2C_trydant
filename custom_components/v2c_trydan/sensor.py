@@ -161,18 +161,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     kwh_per_100km = config_entry.options.get(CONF_KWH_PER_100KM, 15)
     
     # Get coordinator from domain data (already created in __init__.py)
-    coordinator_data = hass.data[DOMAIN].get(config_entry.entry_id)
-    if not coordinator_data:
-        _LOGGER.error("Coordinator data not found for entry")
-        return
-        
-    coordinator = coordinator_data.get("coordinator")
+    coordinator = hass.data[DOMAIN].get(config_entry.entry_id)
     if not coordinator:
         # Create coordinator as fallback
+        _LOGGER.info("Creating coordinator as fallback for sensor platform")
         coordinator = V2CtrydanDataUpdateCoordinator(hass, ip_address)
         try:
             await coordinator.async_config_entry_first_refresh()
-            coordinator_data["coordinator"] = coordinator
+            hass.data[DOMAIN][config_entry.entry_id] = coordinator
         except Exception as e:
             _LOGGER.error(f"Failed to setup coordinator: {e}")
             return

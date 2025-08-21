@@ -29,19 +29,48 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
     ip_address = config_entry.data[CONF_IP_ADDRESS]
-    coordinator = V2CtrydanDataUpdateCoordinator(hass, ip_address)
-    await coordinator.async_config_entry_first_refresh()
-
-    # Obtén precio_luz_entity
-    precio_luz_entity = hass.states.get(config_entry.options[CONF_PRECIO_LUZ]) if CONF_PRECIO_LUZ in config_entry.options else None
+    
+    # Get coordinator from domain data (already created in __init__.py)
+    coordinator = hass.data[DOMAIN].get(config_entry.entry_id)
+    if not coordinator:
+        # Create coordinator as fallback
+        _LOGGER.info("Creating coordinator as fallback for switch platform")
+        coordinator = V2CtrydanDataUpdateCoordinator(hass, ip_address)
+        try:
+            await coordinator.async_config_entry_first_refresh()
+            hass.data[DOMAIN][config_entry.entry_id] = coordinator
+        except Exception as e:
+            _LOGGER.error(f"Failed to setup coordinator: {e}")
+            return
 
     switches = [
         V2CtrydanSwitch(coordinator, ip_address, key)
         for key in ["Paused", "Dynamic", "Locked"]
     ]
+    _LOGGER.info(f"Created {len(switches)} basic switches: {[s.__class__.__name__ for s in switches]}")
 
-    switches.append(V2CCargaPVPCSwitch(precio_luz_entity))
+    # Only add PVPC switch if precio_luz entity is configured
+    if CONF_PRECIO_LUZ in config_entry.options:
+        precio_luz_entity_id = config_entry.options[CONF_PRECIO_LUZ]
+        _LOGGER.info(f"PVPC entity configured: {precio_luz_entity_id}")
+        
+        # Check if entity exists and log all available PVPC entities for debugging
+        all_pvpc_entities = [state.entity_id for state in hass.states.async_all() if 'pvpc' in state.entity_id.lower()]
+        _LOGGER.info(f"Available PVPC entities: {all_pvpc_entities}")
+        
+        precio_luz_entity = hass.states.get(precio_luz_entity_id)
+        if precio_luz_entity is not None:
+            switches.append(V2CCargaPVPCSwitch(precio_luz_entity))
+            _LOGGER.info(f"Added PVPC switch, total switches: {len(switches)}")
+        else:
+            # Create switch anyway - it will work once the entity becomes available
+            _LOGGER.warning(f"PVPC entity '{precio_luz_entity_id}' not found yet, but creating switch anyway")
+            switches.append(V2CCargaPVPCSwitch(None))
+            _LOGGER.info(f"Added PVPC switch (will activate when entity available), total switches: {len(switches)}")
+    else:
+        _LOGGER.info("PVPC entity not configured in options")
 
+    _LOGGER.info(f"Setting up {len(switches)} switches total")
     async_add_entities(switches)
 
 class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
@@ -107,10 +136,25 @@ class V2CCargaPVPCSwitch(SwitchEntity):
     def __init__(self, precio_luz_entity):
         self._is_on = False
         self.precio_luz_entity = precio_luz_entity
+        self._precio_luz_entity_id = precio_luz_entity.entity_id if precio_luz_entity else "sensor.pvpc"
+        _LOGGER.info(f"Initialized V2CCargaPVPCSwitch with entity: {self._precio_luz_entity_id}")
 
     @property
     def unique_id(self):
         return f"v2c_carga_pvpc"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for this entity."""
+        # Get IP from the precio_luz entity or use a default
+        ip_address = "10.48.130.141"  # You might want to get this dynamically
+        return DeviceInfo(
+            identifiers={(DOMAIN, ip_address)},
+            name=f"V2C Trydan ({ip_address})",
+            manufacturer="V2C",
+            model="Trydan",
+            configuration_url=f"http://{ip_address}",
+        )
 
     @property
     def name(self):
@@ -121,10 +165,16 @@ class V2CCargaPVPCSwitch(SwitchEntity):
         return self._is_on
 
     async def async_turn_on(self, **kwargs):
+        # Try to get entity dynamically if not available during init
+        if self.precio_luz_entity is None:
+            self.precio_luz_entity = self.hass.states.get(self._precio_luz_entity_id)
+        
         if self.precio_luz_entity is not None:
             self._is_on = True
+            _LOGGER.info(f"V2C PVPC switch turned ON - monitoring {self._precio_luz_entity_id}")
         else:
             self._is_on = False
+            _LOGGER.warning(f"Cannot turn on PVPC switch - entity {self._precio_luz_entity_id} not found")
 
     async def async_turn_off(self, **kwargs):
         self._is_on = False

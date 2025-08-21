@@ -7,6 +7,8 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import logging
 import aiohttp
 
+from .coordinator import V2CtrydanDataUpdateCoordinator
+
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "v2c_trydan"
@@ -36,20 +38,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     
     ip_address = entry.data[CONF_IP_ADDRESS]
-    hass.data[DOMAIN][entry.entry_id] = {
-        "ip_address": ip_address,
-        "entry": entry
-    }
+    
+    # Create the coordinator
+    coordinator = V2CtrydanDataUpdateCoordinator(hass, ip_address)
+    
+    # Fetch initial data
+    await coordinator.async_config_entry_first_refresh()
+    
+    # Store the coordinator
+    hass.data[DOMAIN][entry.entry_id] = coordinator
     
     # Register device
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
-        identifiers={(DOMAIN, ip_address)},
+        identifiers={(DOMAIN, coordinator.ip_address)},
         manufacturer="V2C",
         model="Trydan",
-        name=f"V2C Trydan ({ip_address})",
-        configuration_url=f"http://{ip_address}",
+        name=f"V2C Trydan ({coordinator.ip_address})",
+        configuration_url=f"http://{coordinator.ip_address}",
     )
     
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -61,7 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             min_intensity = int(min_intensity)
             if 6 <= min_intensity <= 32:
                 #_LOGGER.debug(f"Valid min_intensity: {min_intensity}")
-                await async_set_min_intensity(hass, ip_address, min_intensity)
+                await async_set_min_intensity(hass, coordinator.ip_address, min_intensity)
             else:
                 _LOGGER.error("min_intensity must be between 6 and 32")
         except ValueError:
@@ -73,7 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             dynamic_power_mode = int(dynamic_power_mode)
             if 0 <= dynamic_power_mode <= 7:
                 #_LOGGER.debug(f"Valid dynamic_power_mode: {dynamic_power_mode}")
-                await async_set_dynamic_power_mode(hass, ip_address, dynamic_power_mode)
+                await async_set_dynamic_power_mode(hass, coordinator.ip_address, dynamic_power_mode)
             else:
                 _LOGGER.error("DynamicPowerMode must be between 0 and 7")
         except ValueError:
@@ -85,7 +92,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             max_intensity = int(max_intensity)
             if 6 <= max_intensity <= 32:
                 #_LOGGER.debug(f"Valid max_intensity: {max_intensity}")
-                await async_set_max_intensity(hass, ip_address, max_intensity)
+                await async_set_max_intensity(hass, coordinator.ip_address, max_intensity)
             else:
                 _LOGGER.error("max_intensity must be between 6 y 32")
         except ValueError:
@@ -97,7 +104,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             intensity = int(intensity)
             if 6 <= intensity <= 32:
                 #_LOGGER.debug(f"Valid intensity: {intensity}")
-                await async_set_intensity(hass, ip_address, intensity)
+                await async_set_intensity(hass, coordinator.ip_address, intensity)
             else:
                 _LOGGER.error("intensity must be between 6 y 32")
         except ValueError:
@@ -111,7 +118,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 min_intensity = int(min_intensity)
                 if 6 <= min_intensity <= 32:
                     if entry:
-                        ip_address = entry.data[CONF_IP_ADDRESS]
+                        ip_address = coordinator.ip_address
                         #_LOGGER.debug(f"Calling async_set_min_intensity with IP: {ip_address} and min_intensity: {min_intensity}")
                         await async_set_min_intensity(hass, ip_address, min_intensity)
                     else:
@@ -131,9 +138,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 dynamic_power_mode = int(dynamic_power_mode)
                 if 0 <= dynamic_power_mode <= 7:
                     if entry:
-                        ip_address = entry.data[CONF_IP_ADDRESS]
+                        ip_address = coordinator.ip_address
                         #_LOGGER.debug(f"Calling async_set_dynamic_power_mode with IP: {ip_address} and dynamic_power_mode: {dynamic_power_mode}")
-                        await async_set_dynamic_power_mode(hass, ip_address, dynamic_power_mode)
+                        await async_set_dynamic_power_mode(hass, coordinator.ip_address, dynamic_power_mode)
                     else:
                         _LOGGER.error("Entry data not found for setting dynamic_power_mode_slider")
                 else:
@@ -151,9 +158,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 max_intensity = int(max_intensity)
                 if 6 <= max_intensity <= 32:
                     if entry:
-                        ip_address = entry.data[CONF_IP_ADDRESS]
+                        ip_address = coordinator.ip_address
                         #_LOGGER.debug(f"Calling async_set_max_intensity with IP: {ip_address} and max_intensity: {max_intensity}")
-                        await async_set_max_intensity(hass, ip_address, max_intensity)
+                        await async_set_max_intensity(hass, coordinator.ip_address, max_intensity)
                     else:
                         _LOGGER.error("Entry data not found for setting max_intensity_slider")
                 else:
