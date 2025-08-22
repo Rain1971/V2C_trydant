@@ -93,6 +93,24 @@
       },
       "precio_luz": {
         "name": "Electricity Price"
+      },
+      "batterypower": {
+        "name": "Battery Power"
+      },
+      "voltageinstallation": {
+        "name": "Installation Voltage"
+      },
+      "ip": {
+        "name": "IP Address"
+      },
+      "signalstatus": {
+        "name": "WiFi Signal Status"
+      },
+      "ssid": {
+        "name": "WiFi Network"
+      },
+      "id": {
+        "name": "Device ID"
       }
     },
     "switch": {

@@ -93,6 +93,24 @@
       },
       "precio_luz": {
         "name": "Precio de la Electricidad"
+      },
+      "batterypower": {
+        "name": "Potencia de Batería"
+      },
+      "voltageinstallation": {
+        "name": "Voltaje de Instalación"
+      },
+      "ip": {
+        "name": "Dirección IP"
+      },
+      "signalstatus": {
+        "name": "Estado de Señal WiFi"
+      },
+      "ssid": {
+        "name": "Red WiFi"
+      },
+      "id": {
+        "name": "ID del Dispositivo"
       }
     },
     "switch": {

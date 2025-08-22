@@ -93,6 +93,24 @@
       },
       "precio_luz": {
         "name": "Preu de l'Electricitat"
+      },
+      "batterypower": {
+        "name": "Potència de Bateria"
+      },
+      "voltageinstallation": {
+        "name": "Voltatge d'Instal·lació"
+      },
+      "ip": {
+        "name": "Adreça IP"
+      },
+      "signalstatus": {
+        "name": "Estat del Senyal WiFi"
+      },
+      "ssid": {
+        "name": "Xarxa WiFi"
+      },
+      "id": {
+        "name": "ID del Dispositiu"
       }
     },
     "switch": {

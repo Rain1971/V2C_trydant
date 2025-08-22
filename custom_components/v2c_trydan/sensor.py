@@ -55,10 +55,12 @@ DEVICE_CLASS_MAP = {
     "ChargeEnergy": SensorDeviceClass.ENERGY,
     "HousePower": SensorDeviceClass.POWER,
     "FVPower": SensorDeviceClass.POWER,
+    "BatteryPower": SensorDeviceClass.POWER,
     "Intensity": SensorDeviceClass.CURRENT,
     "MinIntensity": SensorDeviceClass.CURRENT,
     "MaxIntensity": SensorDeviceClass.CURRENT,
     "ContractedPower": SensorDeviceClass.POWER,
+    "VoltageInstallation": SensorDeviceClass.VOLTAGE,
     # Text sensors configuration
     "ChargeState": SensorDeviceClass.ENUM,    # Fixed states
     "ChargeTime": None,                       # Dynamic time format
@@ -71,6 +73,10 @@ DEVICE_CLASS_MAP = {
     "Paused": None,                           # Boolean state
     "PauseDynamic": None,                     # Boolean state
     "SlaveError": None,                       # Error indicator
+    "IP": None,                               # IP address - diagnostic
+    "SignalStatus": None,                     # WiFi signal status
+    "SSID": None,                             # WiFi network name - diagnostic
+    "ID": None,                               # Device ID - diagnostic
 }
 
 # Translation keys for sensor entities
@@ -84,6 +90,7 @@ TRANSLATION_KEY_MAP = {
     "DynamicPowerMode": "dynamicpowermode",
     "FVPower": "fvpower",
     "HousePower": "housepower",
+    "BatteryPower": "batterypower",
     "Intensity": "intensity",
     "Locked": "locked",
     "MaxIntensity": "maxintensity",
@@ -94,6 +101,11 @@ TRANSLATION_KEY_MAP = {
     "Timer": "timer",
     "FirmwareVersion": "firmware_version",
     "ReadyState": "readystate",
+    "VoltageInstallation": "voltageinstallation",
+    "IP": "ip",
+    "SignalStatus": "signalstatus",
+    "SSID": "ssid",
+    "ID": "id",
 }
 
 STATE_CLASS_MAP = {
@@ -101,6 +113,7 @@ STATE_CLASS_MAP = {
     "ChargePower": "measurement",
     "HousePower": "measurement", 
     "FVPower": "measurement",
+    "BatteryPower": "measurement",
     "Intensity": "measurement",
     "MinIntensity": "measurement",
     "MaxIntensity": "measurement",
@@ -112,7 +125,9 @@ STATE_CLASS_MAP = {
     "Locked": "measurement",
     "Paused": "measurement",
     "PauseDynamic": "measurement",
-    "SlaveError": "measurement"
+    "SlaveError": "measurement",
+    "VoltageInstallation": "measurement",
+    "SignalStatus": "measurement"
 }
 
 NATIVE_UNIT_MAP = {
@@ -120,10 +135,12 @@ NATIVE_UNIT_MAP = {
     "ChargeEnergy": "kWh",
     "HousePower": "W",
     "FVPower": "W",
+    "BatteryPower": "W",
     "Intensity": "A",
     "MinIntensity": "A",
     "MaxIntensity": "A",
     "ContractedPower": "W",
+    "VoltageInstallation": "V",
     # Text sensors and state sensors must have None for units
     "ChargeTime": None,
     "FirmwareVersion": None,
@@ -134,7 +151,11 @@ NATIVE_UNIT_MAP = {
     "Locked": None,
     "Paused": None,
     "PauseDynamic": None,
-    "SlaveError": None
+    "SlaveError": None,
+    "IP": None,
+    "SignalStatus": None,
+    "SSID": None,
+    "ID": None
 }
 
 # Options for ENUM sensors
@@ -150,7 +171,11 @@ SENSOR_OPTIONS_MAP = {
 ENTITY_CATEGORY_MAP = {
     "FirmwareVersion": EntityCategory.DIAGNOSTIC,  # Diagnostic information
     "ChargeTime": None,                            # Main operational data
-    "ChargeState": None                            # Main operational data
+    "ChargeState": None,                           # Main operational data
+    "IP": EntityCategory.DIAGNOSTIC,               # Diagnostic information
+    "SSID": EntityCategory.DIAGNOSTIC,             # Diagnostic information
+    "ID": EntityCategory.DIAGNOSTIC,               # Diagnostic information
+    "SignalStatus": EntityCategory.DIAGNOSTIC      # Diagnostic information
 }
 
 UPDATE_INTERVAL = timedelta(minutes=1)
@@ -372,7 +397,7 @@ class V2CtrydanSensor(CoordinatorEntity, SensorEntity):
             value = self.coordinator.data.get(self._data_key)
             if value is None:
                 return None
-            if self._data_key in ["HousePower", "ChargePower", "FVPower"]:
+            if self._data_key in ["HousePower", "ChargePower", "FVPower", "BatteryPower"]:
                 try:
                     return round(float(value))
                 except (ValueError, TypeError):
@@ -625,9 +650,9 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
             entities = {}
             for entity_id, entity_entry in entity_registry_instance.entities.items():
                 if entity_entry.unique_id == paused_switch_id:
-                    entities["paused_switch"] = self.hass.data["switch"].get_entity(entity_id)
+                    entities["paused_switch"] = self.hass.states.get(entity_id)
                 if entity_entry.unique_id == v2c_carga_pvpc_switch_id:
-                    entities["v2c_carga_pvpc_switch"] = self.hass.data["switch"].get_entity(entity_id)
+                    entities["v2c_carga_pvpc_switch"] = self.hass.states.get(entity_id)
                 if entity_entry.unique_id == max_price_entity_id:
                     entities["max_price_entity"] = self.hass.states.get(entity_id)
             return entities

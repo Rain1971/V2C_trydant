@@ -93,6 +93,24 @@
       },
       "precio_luz": {
         "name": "Elektrizitate Prezioa"
+      },
+      "batterypower": {
+        "name": "Bateria Potentzia"
+      },
+      "voltageinstallation": {
+        "name": "Instalazio Tentsioa"
+      },
+      "ip": {
+        "name": "IP Helbidea"
+      },
+      "signalstatus": {
+        "name": "WiFi Seinale Egoera"
+      },
+      "ssid": {
+        "name": "WiFi Sarea"
+      },
+      "id": {
+        "name": "Gailuaren ID"
       }
     },
     "switch": {
