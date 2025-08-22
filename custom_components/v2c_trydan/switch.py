@@ -60,12 +60,12 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
         
         precio_luz_entity = hass.states.get(precio_luz_entity_id)
         if precio_luz_entity is not None:
-            switches.append(V2CCargaPVPCSwitch(precio_luz_entity))
+            switches.append(V2CCargaPVPCSwitch(precio_luz_entity, ip_address))
             _LOGGER.info(f"Added PVPC switch, total switches: {len(switches)}")
         else:
             # Create switch anyway - it will work once the entity becomes available
             _LOGGER.warning(f"PVPC entity '{precio_luz_entity_id}' not found yet, but creating switch anyway")
-            switches.append(V2CCargaPVPCSwitch(None))
+            switches.append(V2CCargaPVPCSwitch(None, ip_address))
             _LOGGER.info(f"Added PVPC switch (will activate when entity available), total switches: {len(switches)}")
     else:
         _LOGGER.info("PVPC entity not configured in options")
@@ -133,10 +133,13 @@ class V2CtrydanSwitch(CoordinatorEntity, SwitchEntity):
             raise
 
 class V2CCargaPVPCSwitch(SwitchEntity):
-    def __init__(self, precio_luz_entity):
+    def __init__(self, precio_luz_entity, ip_address):
         self._is_on = False
         self.precio_luz_entity = precio_luz_entity
+        self._ip_address = ip_address
         self._precio_luz_entity_id = precio_luz_entity.entity_id if precio_luz_entity else "sensor.pvpc"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "carga_pvpc"
         _LOGGER.info(f"Initialized V2CCargaPVPCSwitch with entity: {self._precio_luz_entity_id}")
 
     @property
@@ -146,14 +149,12 @@ class V2CCargaPVPCSwitch(SwitchEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for this entity."""
-        # Get IP from the precio_luz entity or use a default
-        ip_address = "10.48.130.141"  # You might want to get this dynamically
         return DeviceInfo(
-            identifiers={(DOMAIN, ip_address)},
-            name=f"V2C Trydan ({ip_address})",
+            identifiers={(DOMAIN, self._ip_address)},
+            name=f"V2C Trydan ({self._ip_address})",
             manufacturer="V2C",
             model="Trydan",
-            configuration_url=f"http://{ip_address}",
+            configuration_url=f"http://{self._ip_address}",
         )
 
     @property
@@ -164,12 +165,22 @@ class V2CCargaPVPCSwitch(SwitchEntity):
     def is_on(self):
         return self._is_on
 
+    @property
+    def available(self):
+        """Return if entity is available."""
+        # Try to refresh PVPC entity if not available
+        if self.precio_luz_entity is None:
+            self.precio_luz_entity = self.hass.states.get(self._precio_luz_entity_id)
+        
+        # Entity is available if we have PVPC entity or if it exists in hass.states
+        return self.precio_luz_entity is not None or self.hass.states.get(self._precio_luz_entity_id) is not None
+
     async def async_turn_on(self, **kwargs):
         # Try to get entity dynamically if not available during init
         if self.precio_luz_entity is None:
             self.precio_luz_entity = self.hass.states.get(self._precio_luz_entity_id)
         
-        if self.precio_luz_entity is not None:
+        if self.precio_luz_entity is not None or self.hass.states.get(self._precio_luz_entity_id) is not None:
             self._is_on = True
             _LOGGER.info(f"V2C PVPC switch turned ON - monitoring {self._precio_luz_entity_id}")
         else:
@@ -178,3 +189,16 @@ class V2CCargaPVPCSwitch(SwitchEntity):
 
     async def async_turn_off(self, **kwargs):
         self._is_on = False
+        _LOGGER.info(f"V2C PVPC switch turned OFF")
+
+    async def async_added_to_hass(self):
+        """Called when entity is added to hass."""
+        await super().async_added_to_hass()
+        
+        # Check if PVPC entity is available after being added to hass
+        if self.precio_luz_entity is None:
+            self.precio_luz_entity = self.hass.states.get(self._precio_luz_entity_id)
+            if self.precio_luz_entity is not None:
+                _LOGGER.info(f"PVPC entity {self._precio_luz_entity_id} found after being added to hass")
+                # Update the entity state to reflect availability
+                self.async_write_ha_state()

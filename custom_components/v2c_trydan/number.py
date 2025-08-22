@@ -22,9 +22,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     
     async_add_entities([MaxIntensityNumber(coordinator)])
     async_add_entities([MinIntensityNumber(coordinator)])
-    async_add_entities([KmToChargeNumber(hass)])
+    async_add_entities([KmToChargeNumber(hass, ip_address)])
     async_add_entities([IntensityNumber(coordinator)])
-    async_add_entities([MaxPrice(hass)])
+    async_add_entities([MaxPrice(hass, ip_address)])
 
 class MaxIntensityNumber(CoordinatorEntity, NumberEntity):
     """Representation of max intensity number entity."""
@@ -224,9 +224,10 @@ class MinIntensityNumber(CoordinatorEntity, NumberEntity):
 class KmToChargeNumber(NumberEntity):
     """Representation of km to charge number entity."""
     
-    def __init__(self, hass):
+    def __init__(self, hass, ip_address):
         """Initialize the number entity."""
         self._hass = hass
+        self._ip_address = ip_address
         self._state = 0
         self._attr_has_entity_name = True
         self._attr_translation_key = "km_to_charge"
@@ -235,6 +236,16 @@ class KmToChargeNumber(NumberEntity):
     def unique_id(self):
         return "v2c_km_to_charge"
 
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for this entity."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._ip_address)},
+            name=f"V2C Trydan ({self._ip_address})",
+            manufacturer="V2C",
+            model="Trydan",
+            configuration_url=f"http://{self._ip_address}",
+        )
 
     @property
     def icon(self):
@@ -356,9 +367,10 @@ class IntensityNumber(CoordinatorEntity, NumberEntity):
 class MaxPrice(NumberEntity):
     """Representation of max price number entity."""
     
-    def __init__(self, hass):
+    def __init__(self, hass, ip_address):
         """Initialize the number entity."""
         self._hass = hass
+        self._ip_address = ip_address
         self._state = 0
         self._attr_has_entity_name = True
         self._attr_translation_key = "max_price"
@@ -370,14 +382,12 @@ class MaxPrice(NumberEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for this entity."""
-        # Use the same IP as other entities
-        ip_address = "10.48.130.141"  # You might want to get this dynamically
         return DeviceInfo(
-            identifiers={(DOMAIN, ip_address)},
-            name=f"V2C Trydan ({ip_address})",
+            identifiers={(DOMAIN, self._ip_address)},
+            name=f"V2C Trydan ({self._ip_address})",
             manufacturer="V2C",
             model="Trydan",
-            configuration_url=f"http://{ip_address}",
+            configuration_url=f"http://{self._ip_address}",
         )
 
     @property
