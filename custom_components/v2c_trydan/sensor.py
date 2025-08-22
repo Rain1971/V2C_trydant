@@ -679,11 +679,11 @@ class PrecioLuzEntity(CoordinatorEntity, SensorEntity):
             return valid_hours, valid_hours_next_day, total_hours
     
         async def pause_or_resume_charging(current_state, max_price, paused_switch, v2c_carga_pvpc_switch):
-            if v2c_carga_pvpc_switch.is_on:
+            if v2c_carga_pvpc_switch.state == "on":
                 if float(current_state) <= max_price:
-                    await paused_switch.async_turn_off()
+                    await self.hass.services.async_call("switch", "turn_off", {"entity_id": paused_switch.entity_id})
                 else:
-                    await paused_switch.async_turn_on()
+                    await self.hass.services.async_call("switch", "turn_on", {"entity_id": paused_switch.entity_id})
 
         async def update_state(event_time):
             entities = await find_entities()
