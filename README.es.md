@@ -1,3 +1,17 @@
+# [DEPRECATED] V2C Trydan
+
+> **Aviso:** Este proyecto ya no cuenta con soporte ni mantenimiento.
+
+## Estado: Discontinuado
+Debido a un fallo de hardware en el dispositivo específico para el cual se desarrolló este proyecto, me es imposible continuar realizando pruebas, depuraciones o publicar actualizaciones. Al no tener ya acceso al entorno físico necesario para el desarrollo, este repositorio ha sido archivado.
+
+### ¿Puedo seguir usándolo?
+¡Sí! El código permanece disponible con fines educativos o como referencia. Eres libre de:
+* Hacer un **Fork** del repositorio si deseas continuar el desarrollo por tu cuenta.
+* Utilizar el código existente bajo los términos de la licencia del proyecto.
+
+Gracias a todos los que mostraron interés o contribuyeron a este proyecto.
+
 # CARGADOR DE COCHE V2C TRYDAN para HOME ASSISTANT
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
