@@ -1,4 +1,4 @@
-# [DEPRECATED] Project Name
+# [DEPRECATED] V2C Trydan
 
 > **Notice:** This project is no longer maintained.
 
