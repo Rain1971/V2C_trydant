@@ -1,4 +1,4 @@
-from homeassistant.components.number import NumberEntity
+from homeassistant.components.number import NumberEntity, RestoreNumber
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.const import DEVICE_DEFAULT_NAME, CONF_IP_ADDRESS
 from homeassistant.helpers import config_validation as cv
@@ -221,7 +221,7 @@ class MinIntensityNumber(CoordinatorEntity, NumberEntity):
             raise
 
 
-class KmToChargeNumber(NumberEntity):
+class KmToChargeNumber(RestoreNumber):
     """Representation of km to charge number entity."""
     
     def __init__(self, hass, ip_address):
@@ -277,6 +277,14 @@ class KmToChargeNumber(NumberEntity):
             self.async_write_ha_state()
         else:
             _LOGGER.error("v2c_km_to_charge must be between 0 and 1000")
+
+    async def async_added_to_hass(self) -> None:
+        """When entity is added to Home Assistant."""
+        await super().async_added_to_hass()
+
+        state = await self.async_get_last_state()
+        if state is not None:
+            await self.async_set_native_value(float(state.state))
 
 class IntensityNumber(CoordinatorEntity, NumberEntity):
     """Representation of intensity number entity."""
@@ -364,7 +372,7 @@ class IntensityNumber(CoordinatorEntity, NumberEntity):
             _LOGGER.error(f"Error setting intensity: {err}")
             raise
 
-class MaxPrice(NumberEntity):
+class MaxPrice(RestoreNumber):
     """Representation of max price number entity."""
     
     def __init__(self, hass, ip_address):
@@ -420,3 +428,11 @@ class MaxPrice(NumberEntity):
             self.async_write_ha_state()
         else:
             _LOGGER.error("v2c_MaxPrice must be between 0 and 1")
+
+    async def async_added_to_hass(self) -> None:
+        """When entity is added to Home Assistant."""
+        await super().async_added_to_hass()
+
+        state = await self.async_get_last_state()
+        if state is not None:
+            await self.async_set_native_value(float(state.state))
